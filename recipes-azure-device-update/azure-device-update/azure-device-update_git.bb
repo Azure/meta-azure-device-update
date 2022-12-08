@@ -13,22 +13,16 @@
 
 LICENSE = "CLOSED"
 
-ADUC_GIT_BRANCH ?= "master"
-ADUC_SRC_URI ?= "git://github.com/Azure/adu-private-preview;branch=${ADUC_GIT_BRANCH}"
-SRC_URI = "${ADUC_SRC_URI}"
+ADU_GIT_BRANCH ?= "main"
 
-# This code handles setting variables for either git or for a local file.
-# This is only while we are using private repos, once our repos are public,
-# we will just use git.
-python () {
-    src_uri = d.getVar('ADUC_SRC_URI')
-    if src_uri.startswith('git'):
-        d.setVar('SRCREV', d.getVar('AUTOREV'))
-        d.setVar('PV', '1.0+git' + d.getVar('SRCPV'))
-        d.setVar('S', d.getVar('WORKDIR') + "/git")
-    elif src_uri.startswith('file'):
-        d.setVar('S',  d.getVar('WORKDIR') + "/adu-linux-client")
-}
+ADU_SRC_URI ?= "gitsm://github.com/Azure/iot-hub-device-update"
+SRC_URI = "${ADU_SRC_URI};branch=${ADU_GIT_BRANCH}"
+
+ADU_GIT_COMMIT ?= "33554d29476eab2447234528c8aed186e2b6423d"
+SRCREV = "${ADU_GIT_COMMIT}
+
+PV = "1.0+git${SRCPV}"
+S = "${WORKDIR}/git" 
 
 # ADUC depends on azure-iot-sdk-c, azure-blob-storage-file-upload-utility, DO Agent SDK, and curl
 DEPENDS = "azure-iot-sdk-c azure-blob-storage-file-upload-utility deliveryoptimization-agent deliveryoptimization-sdk curl"

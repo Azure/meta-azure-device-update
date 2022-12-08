@@ -7,31 +7,17 @@
 
 LICENSE = "CLOSED"
 
-# Option 1 - Bind to a specific branch and commit
-#
-# e.g.
-#
-# SRC_URI = "gitsm://github.com/microsoft/do-client;branch=main"
-# SRCREV = "ef70c5c8a59d46820c648f434249516957966e7f"
-# PV = "1.0+git${SRCPV}"
-# S = "${WORKDIR}/git" 
+DO_GIT_BRANCH ?= "main"
 
-# Option 2 - Bind to branch and commit specified in a build env 'DO_SRC_URI'
-#            This supports both git or a local file.
-DO_SRC_URI ?= "gitsm://github.com/microsoft/do-client;branch=main"
-SRC_URI = "${DO_SRC_URI}"
-# This code handles setting variables for either git or for a local file.
-# This is only while we are using private repos, once our repos are public,
-# we will just use git.
-python () {
-    src_uri = d.getVar('DO_SRC_URI')
-    if src_uri.startswith('git'):
-        d.setVar('SRCREV', d.getVar('AUTOREV'))
-        d.setVar('PV', '1.0+git' + d.getVar('SRCPV'))
-        d.setVar('S', d.getVar('WORKDIR') + "/git")
-    elif src_uri.startswith('file'):
-        d.setVar('S',  d.getVar('WORKDIR') + "/do-client")
-}
+DO_SRC_URI ?= "gitsm://github.com/microsoft/do-client"
+SRC_URI = "${DO_SRC_URI};branch=${DO_GIT_BRANCH}"
+
+DO_GIT_COMMIT ?= "b61de2d347c8032562056b18f90ec710e531baf8"
+SRCREV = "${DO_GIT_COMMITs}"
+
+PV = "1.0+git${SRCPV}"
+S = "${WORKDIR}/git" 
+
 
 DEPENDS = "boost curl libproxy msft-gsl"
 
