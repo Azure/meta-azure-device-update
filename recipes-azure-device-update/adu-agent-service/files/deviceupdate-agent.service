@@ -1,0 +1,18 @@
+[Unit]
+Description=Device Update Agent daemon.
+After=network-online.target deliveryoptimization-agent.service
+Wants=network-online.target deliveryoptimization-agent.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=adu
+Group=adu
+# We can check logs with journalctl -f -u deviceupdate-agent.service --no-tail
+# For development purposes, set log verbosity level to 'Debug' (-l 0) and enable IoT Hub tracing (-1).
+# For production, set log verbosity level to 'Info' (-l 1) to improve performance.
+ExecStart=/usr/bin/AducIotAgent -l 0 -e
+
+[Install]
+WantedBy=multi-user.target
