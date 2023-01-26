@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=e74f78882cab57fd1cc4c5482b9a214a"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-SRC_URI = "gitsm://github.com/Azure/azure-sdk-for-cpp.git;branch=main"
+SRC_URI = "git://github.com/Azure/azure-sdk-for-cpp.git;protocol=https;branch=main"
 
 # Commit c4e95df 1/31/2022
 # SRCREV = "c4e95dfcfcae621ce703ddf95f2569148d136840"

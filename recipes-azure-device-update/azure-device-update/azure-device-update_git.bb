@@ -2,7 +2,7 @@
 
 # Environment variables that can be used to configure the behavior of this recipe.
 # ADUC_GIT_URL          Changes the URL of github repository that ADU code is pulled from.
-#                           Default: gitsm://github.com/Azure/iot-hub-device-update
+#                           Default: git://github.com/Azure/iot-hub-device-update
 #            
 # ADUC_GIT_BRANCH       Changes the branch that ADU code is pulled from.
 #                           Default: main
@@ -15,8 +15,8 @@ LICENSE = "CLOSED"
 
 ADU_GIT_BRANCH ?= "main"
 
-ADU_SRC_URI ?= "gitsm://github.com/Azure/iot-hub-device-update"
-SRC_URI = "${ADU_SRC_URI};branch=${ADU_GIT_BRANCH}"
+ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
+SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 
 ADU_GIT_COMMIT ?= "33554d29476eab2447234528c8aed186e2b6423d"
 SRCREV = "${ADU_GIT_COMMIT}"
