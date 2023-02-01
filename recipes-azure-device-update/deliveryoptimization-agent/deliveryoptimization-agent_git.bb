@@ -7,12 +7,12 @@
 
 LICENSE = "CLOSED"
 
-DO_GIT_BRANCH ?= "main"
+DO_GIT_BRANCH ?= "develop"
 
 DO_SRC_URI ?= "git://github.com/microsoft/do-client"
 SRC_URI = "${DO_SRC_URI};protocol=https;branch=${DO_GIT_BRANCH}"
 
-DO_GIT_COMMIT ?= "b61de2d347c8032562056b18f90ec710e531baf8"
+DO_GIT_COMMIT ?= "98919b269e375f2ee317f0f1d91e655b91800a04"
 SRCREV = "${DO_GIT_COMMIT}"
 
 PV = "1.0+git${SRCPV}"
