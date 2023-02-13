@@ -2,7 +2,7 @@
 
 # Environment variables that can be used to configure the behavior of this recipe.
 # ADUC_GIT_URL          Changes the URL of github repository that ADU code is pulled from.
-#                           Default: gitsm://github.com/Azure/iot-hub-device-update
+#                           Default: git://github.com/Azure/iot-hub-device-update
 #            
 # ADUC_GIT_BRANCH       Changes the branch that ADU code is pulled from.
 #                           Default: main
@@ -15,10 +15,12 @@ LICENSE = "CLOSED"
 
 ADU_GIT_BRANCH ?= "main"
 
-ADU_SRC_URI ?= "gitsm://github.com/Azure/iot-hub-device-update"
-SRC_URI = "${ADU_SRC_URI};branch=${ADU_GIT_BRANCH}"
+ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
+SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 
-ADU_GIT_COMMIT ?= "33554d29476eab2447234528c8aed186e2b6423d"
+ADU_GIT_COMMIT ?= "79ce3ba24c411d3b014226cd869e2b2d02159a20"
+SRC_URI += "file://0001-Fixup-compilation-error.patch"
+
 SRCREV = "${ADU_GIT_COMMIT}"
 
 PV = "1.0+git${SRCPV}"
@@ -28,6 +30,12 @@ S = "${WORKDIR}/git"
 DEPENDS = "azure-iot-sdk-c azure-blob-storage-file-upload-utility deliveryoptimization-agent deliveryoptimization-sdk curl"
 
 inherit cmake useradd
+
+#OpenSSL3.0 is not yet supported in HEAD commit on main branch
+# -- Ignore warnings for now...
+TARGET_CFLAGS:append = " -Wno-error=deprecated-declarations"
+TARGET_CPPFLAGS:append = " -Wno-error=deprecated-declarations"
+TARGET_CXXFLAGS:append = " -Wno-error=deprecated-declarations"
 
 BUILD_TYPE ?= "Debug"
 EXTRA_OECMAKE += "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
@@ -68,17 +76,18 @@ EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 # curl - for running the diagnostics component
 RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service azure-device-update-diffs curl openssl-bin nss ca-certificates"
 
-ADUC_DATA_DIR = "/var/lib/adu"
-ADUC_EXTENSIONS_DIR = "${ADUC_DATA_DIR}/extensions"
-ADUC_EXTENSIONS_INSTALL_DIR = "${ADUC_EXTENSIONS_DIR}/sources"
-ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR = "${ADUC_EXTENSIONS_DIR}/component_enumerator"
-ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR = "${ADUC_EXTENSIONS_DIR}/content_downloader"
-ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR = "${ADUC_EXTENSIONS_DIR}/update_content_handlers"
-ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR = "${ADUC_EXTENSIONS_DIR}/download_handlers"
-ADUC_DOWNLOADS_DIR = "${ADUC_DATA_DIR}/downloads"
+ADUC_DATA_DIR ?= "/var/lib/adu"
+ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
+ADUC_EXTENSIONS_INSTALL_DIR ?= "${ADUC_EXTENSIONS_DIR}/sources"
+ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/component_enumerator"
+ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/content_downloader"
+ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/update_content_handlers"
+ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/download_handlers"
+ADUC_DOWNLOADS_DIR ?= "${ADUC_DATA_DIR}/downloads"
+ADUC_DOWNLOADS_FOLDER ?= "${ADUC_DOWNLOADS_DIR}"
 
-ADUC_LOG_DIR = "/adu/logs"
-ADUC_CONF_DIR = "/adu"
+ADUC_LOG_DIR ?= "/adu/logs"
+ADUC_CONF_DIR ?= "/adu"
 
 ADUUSER = "adu"
 ADUGROUP = "adu"
@@ -167,13 +176,18 @@ do_install:append() {
     chmod u+s ${D}${libdir}/adu/adu-shell
 }
 
+#We don't want the library file hashes to change between do_image -> do_package,
+#otherwise the stored json hashes will be incorrect
+INHIBIT_PACKAGE_STRIP = "1"
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
+
 #
 # A helper function that registers the required agent's extensions.
 #
-python do_registerAgentExtensions() {
+fakeroot python do_registerAgentExtensions() {
 
     try:
-        workDir = os.path.join(d.getVar("PKGDEST"), d.getVar("PN"))
+        workDir = d.getVar("D")
         extensionInstallDir = d.getVar("ADUC_EXTENSIONS_INSTALL_DIR")
         updateContentRegistrationDirectory = d.getVar("ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR")
         contentDownloaderRegistrationDirectory = d.getVar("ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR")
@@ -193,8 +207,14 @@ python do_registerAgentExtensions() {
         errorMessage = "Failed to create DU Agent extension registration. An exception of type {0} occurred with message:\n{1} and Arguments:\n{2!r}".format(type(ex).__name__, str(ex), ex.args)
         bb.error(errorMessage)
 }
+do_registerAgentExtensions[depends] += "virtual/fakeroot-native:do_populate_sysroot"
+addtask do_registerAgentExtensions after do_install before do_package
 
-do_package[postfuncs] += "do_registerAgentExtensions"
+fakeroot do_registerAgentExtensions_permissions(){
+    chown -R ${ADUUSER}:${ADUGROUP} ${D}${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}
+}
+do_registerAgentExtensions[depends] += "virtual/fakeroot-native:do_populate_sysroot"
+addtask do_registerAgentExtensions_permissions after do_registerAgentExtensions before do_package
 
 FILES:${PN} += "${bindir}/AducIotAgent"
 FILES:${PN} += "${libdir}/adu/* ${ADUC_DATA_DIR}/* ${ADUC_LOG_DIR}/* ${ADUC_CONF_DIR}/*"

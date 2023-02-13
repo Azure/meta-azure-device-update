@@ -1,0 +1,47 @@
+From 56058c22075f845688c7bef21aa20d1d1793c13a Mon Sep 17 00:00:00 2001
+From: Nathan Barrett-Morrison <nathan.morrison@timesys.com>
+Date: Fri, 27 Jan 2023 12:54:17 -0500
+Subject: [PATCH] Fixup compilation error
+
+1)
+git/src/communication_managers/iothub_communication_manager/src/iothub_communication_manager.c:685:9:
+error: enumeration value 'IOTHUB_CLIENT_CONNECTION_QUOTA_EXCEEDED' not handled in switch [-Werror=switch]
+
+2)
+FAILED: src/agent/AducIotAgent
+undefined reference to `iothub_device_auth_generate_credentials'
+undefined reference to `iothub_device_auth_destroy'
+undefined reference to `iothub_device_auth_create'
+---
+ src/agent/adu_core_export_helpers/CMakeLists.txt              | 2 +-
+ .../src/iothub_communication_manager.c                        | 4 ++++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/agent/adu_core_export_helpers/CMakeLists.txt b/src/agent/adu_core_export_helpers/CMakeLists.txt
+index eeda05b..c1ca509 100644
+--- a/src/agent/adu_core_export_helpers/CMakeLists.txt
++++ b/src/agent/adu_core_export_helpers/CMakeLists.txt
+@@ -17,5 +17,5 @@ target_sources (${target_name} PRIVATE src/adu_core_export_helpers.c)
+ 
+ target_link_libraries (
+     ${target_name}
+-    PUBLIC aduc::adu_types aduc::c_utils
++    PUBLIC aduc::adu_types aduc::c_utils prov_auth_client hsm_security_client utpm
+     PRIVATE aduc::logging aduc::platform_layer Parson::parson)
+diff --git a/src/communication_managers/iothub_communication_manager/src/iothub_communication_manager.c b/src/communication_managers/iothub_communication_manager/src/iothub_communication_manager.c
+index 948a115..a545610 100644
+--- a/src/communication_managers/iothub_communication_manager/src/iothub_communication_manager.c
++++ b/src/communication_managers/iothub_communication_manager/src/iothub_communication_manager.c
+@@ -713,6 +713,10 @@ static void Connection_Maintenance()
+             additionalDelayInSeconds = TIME_SPAN_FIVE_MINUTES_IN_SECONDS;
+             break;
+ 
++        case IOTHUB_CLIENT_CONNECTION_QUOTA_EXCEEDED:
++            //Do nothing;
++            break;
++
+         case IOTHUB_CLIENT_CONNECTION_OK:
+             // No need to retry.
+             return;
+-- 
+2.30.2

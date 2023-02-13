@@ -1,0 +1,32 @@
+From 8f26b0cfacf93b112ce422efa406d19edc7541cc Mon Sep 17 00:00:00 2001
+From: Nathan Barrett-Morrison <nathan.morrison@timesys.com>
+Date: Thu, 26 Jan 2023 15:30:46 -0500
+Subject: [PATCH] Fixup compiler warning:
+
+client_certificate_credential.hpp:60:9: error: 'Azure::Identity::ClientCertificateCredential' declared with greater visibility than the type of its field 'Azure::Identity::ClientCertificateCredential::m_pkey' [-Werror=attributes]
+---
+ .../inc/azure/identity/client_certificate_credential.hpp        | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/sdk/identity/azure-identity/inc/azure/identity/client_certificate_credential.hpp b/sdk/identity/azure-identity/inc/azure/identity/client_certificate_credential.hpp
+index 669a849f2..c1de6912b 100644
+--- a/sdk/identity/azure-identity/inc/azure/identity/client_certificate_credential.hpp
++++ b/sdk/identity/azure-identity/inc/azure/identity/client_certificate_credential.hpp
+@@ -57,6 +57,7 @@ namespace Azure { namespace Identity {
+    * Client ID and a client certificate.
+    *
+    */
++  #pragma GCC visibility push(hidden)
+   class ClientCertificateCredential final : public Core::Credentials::TokenCredential {
+   private:
+     _detail::TokenCache m_tokenCache;
+@@ -122,5 +123,6 @@ namespace Azure { namespace Identity {
+         Core::Credentials::TokenRequestContext const& tokenRequestContext,
+         Core::Context const& context) const override;
+   };
++  #pragma GCC visibility pop
+ 
+ }} // namespace Azure::Identity
+-- 
+2.34.1
+
