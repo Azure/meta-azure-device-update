@@ -68,13 +68,22 @@ EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
 
 EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 
+# Set ADU_PUB_KEY_GEN to "on" if you want to include adu-pub-key in RDEPENDS
+ADU_PUB_KEY_GEN ?= "off"
+
 # bash - for running shell scripts for install.
 # swupdate - to install update package.
 # adu-pub-key - to install public key for update package verification.
 # adu-log-dir - to create the temporary log directory in the image.
 # deliveryoptimization-agent-service - to install the delivery optimization agent for downloads.
 # curl - for running the diagnostics component
-RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service azure-device-update-diffs curl openssl-bin nss ca-certificates"
+RDEPENDS:${PN} += "bash swupdate adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
+
+# Conditionally add adu-pub-key to RDEPENDS based on ADU_PUB_KEY_GEN value
+python () {
+    if d.getVar('ADU_PUB_KEY_GEN') == 'on':
+        d.appendVar('RDEPENDS', ' adu-pub-key:enable')
+}
 
 ADUC_DATA_DIR ?= "/var/lib/adu"
 ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
