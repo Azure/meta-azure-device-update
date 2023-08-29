@@ -7,9 +7,9 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=4283671594edec4c13aeb073c219237a"
 
 # We pull from main branch in order to get PnP APIs
-SRC_URI = "gitsm://github.com/Azure/azure-iot-sdk-c.git;protocol=https;branch=main"
+SRC_URI = "gitsm://github.com/Azure/azure-iot-sdk-c.git;protocol=https;branch=lts_07_2021"
 
-SRCREV = "021212f84f3014709f11314a829e22bc537c11e2"
+SRCREV = "LTS_07_2021_Ref01"
 PV = "1.0+git${SRCPV}"
 
 S = "${WORKDIR}/git"
@@ -17,12 +17,15 @@ S = "${WORKDIR}/git"
 # util-linux for uuid-dev
 DEPENDS = "util-linux curl openssl boost cpprest libproxy msft-gsl"
 
+# depend on openssl 1.1.1 custom recipe
+DEPENDS += "adu-iothub-c-sdk-openssl"
+
 inherit cmake
 
 # Do not use amqp since it is deprecated.
 # Do not build sample code to save build time.
 # use_http: required uhttp for eis_utils
-EXTRA_OECMAKE += "-Duse_amqp:BOOL=OFF -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Dskip_samples:BOOL=ON -Dbuild_service_client:BOOL=OFF -Dbuild_provisioning_service_client:BOOL=OFF"
+EXTRA_OECMAKE += "-Duse_amqp:BOOL=OFF -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Duse_wsio:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Dskip_samples:BOOL=ON -Dbuild_service_client:BOOL=OFF -Dbuild_provisioning_service_client:BOOL=OFF -DOPENSSL_ROOT_DIR=${WORKDIR}/adu-iothub-c-sdk-openssl-1.1.1u"
 
 sysroot_stage_all:append () {
     sysroot_stage_dir ${D}${exec_prefix}/cmake ${SYSROOT_DESTDIR}${exec_prefix}/cmake
