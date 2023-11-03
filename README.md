@@ -13,7 +13,6 @@ This layer contains the following recipes:
 
 | Recipe Name      | Description |
 | ------------- | ---------- |
-| azure-blob-storage-file-upload-utility | This is a wrapper utility for the Azure SDK for Cpp's Storage SDK for use in DeviceUpdate in IotHub. It provides the functions necessary to upload files passed to the utility to an Azure Blob Storage account using a SAS url by exposing a C interface. <br/> For more information, see [Azure Blog Storage File Upload Utility on Github](https://github.com/Azure/azure-blob-storage-file-upload-utility/blob/main/README.md) |
 | azure-device-update | Device Update for IoT Hub is a service that enables you to deploy over-the-air updates (OTA) for your IoT devices.<br/>For more information, see [Device Update for Iot Hub on Github](https://github.com/Azure/iot-hub-device-update) |
 | azure-iot-sdk-c | The Azure IoT device SDK is a set of libraries designed to simplify the process of sending messages to and receiving messages from the Azure IoT Hub service. The [Azure IoT device SDK for C](https://learn.microsoft.com/en-us/azure/iot-hub/iot-hub-device-sdk-c-intro) is required by [Device Update for Iot Hub](https://github.com/Azure/iot-hub-device-update)  |
 | azure-sdk-for-cpp | [The Azure SDK for C++](https://github.com/Azure/azure-sdk-for-cpp) is required by [Azure Blog Storage File Upload Utility](https://github.com/Azure/azure-blob-storage-file-upload-utility/blob/main/README.md) |

@@ -1,4 +1,4 @@
-# Build and install the azure-blob-storage-file-upload-utility
+# Build and install the azure-sdk-for-cpp
 
 DESCRIPTION = "Microsoft Azure SD for CPP"
 AUTHOR = "Microsoft Corporation"
@@ -36,7 +36,7 @@ FILES:${PN} = "/usr/share/azure-storage-blobs-cpp \
                 /usr/share/azure-security-keyvault-secrets-cpp \
                 /usr/share/azure-security-keyvault-certificates-cpp \
                 /usr/share/azure-security-keyvault-keys-cpp \
-		        /usr/share/azure-security-attestation-cpp \
+		            /usr/share/azure-security-attestation-cpp \
                 /usr/share/azure-identity-cpp \
                 /usr/share/azure-template-cpp \
                 /usr/share/azure-core-cpp \

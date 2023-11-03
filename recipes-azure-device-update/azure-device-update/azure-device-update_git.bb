@@ -25,7 +25,7 @@ PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git" 
 
 # ADUC depends on azure-iot-sdk-c, azure-blob-storage-file-upload-utility, DO Agent SDK, and curl
-DEPENDS = "azure-iot-sdk-c azure-blob-storage-file-upload-utility deliveryoptimization-agent deliveryoptimization-sdk curl"
+DEPENDS = "azure-iot-sdk-c deliveryoptimization-agent deliveryoptimization-sdk curl"
 
 inherit cmake useradd
 
@@ -59,7 +59,6 @@ EXTRA_OECMAKE += "-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake"
 EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
 
 EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
-
 # bash - for running shell scripts for install.
 # swupdate - to install update package.
 # adu-pub-key - to install public key for update package verification.
@@ -153,18 +152,15 @@ do_install:append() {
     chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_LOG_DIR}
     chmod 0774 ${D}${ADUC_LOG_DIR}
 
-    #install adu-shell to /usr/lib/adu directory.
-    install -d ${D}${libdir}/adu
-
-    install -m 0550 ${S}/src/adu-shell/scripts/adu-swupdate.sh ${D}${libdir}/adu
-    chown ${ADUUSER}:${ADUGROUP} ${D}${libdir}/adu
+    install -m 0550 ${S}/src/adu-shell/scripts/adu-swupdate.sh ${D}${bindir}
+    chown ${ADUUSER}:${ADUGROUP} ${D}${bindir}/adu-swupdate.sh
 
     #set owner for adu-shell
-    chmod 0550 ${D}${libdir}/adu/adu-shell
-    chown root:${ADUGROUP} ${D}${libdir}/adu/adu-shell
+    chmod 0550 ${D}${bindir}/adu-shell
+    chown root:${ADUGROUP} ${D}${bindir}/adu-shell
 
     #set S UID for adu-shell
-    chmod u+s ${D}${libdir}/adu/adu-shell
+    chmod u+s ${D}${bindir}/adu-shell
 }
 
 #
@@ -197,7 +193,9 @@ python do_registerAgentExtensions() {
 do_package[postfuncs] += "do_registerAgentExtensions"
 
 FILES:${PN} += "${bindir}/AducIotAgent"
-FILES:${PN} += "${libdir}/adu/* ${ADUC_DATA_DIR}/* ${ADUC_LOG_DIR}/* ${ADUC_CONF_DIR}/*"
+FILES:${PN} += "${bindir}/adu-shell"
+FILES:${PN} += "${bindir}/adu-swupdate.sh"
+FILES:${PN} += "${ADUC_DATA_DIR}/* ${ADUC_LOG_DIR}/* ${ADUC_CONF_DIR}/*"
 FILES:${PN} += "${ADUC_EXTENSIONS_DIR}/* ${ADUC_EXTENSIONS_INSTALL_DIR}/* ${ADUC_DOWNLOADS_DIR}/*"
 FILES:${PN} += "${ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR}/* ${ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR}/* ${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}/* ${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR}/*"
 
