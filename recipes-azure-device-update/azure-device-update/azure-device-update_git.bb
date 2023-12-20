@@ -24,8 +24,8 @@ SRCREV = "${ADU_GIT_COMMIT}"
 PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git" 
 
-# ADUC depends on azure-iot-sdk-c, azure-blob-storage-file-upload-utility, DO Agent SDK, and curl
-DEPENDS = "azure-iot-sdk-c deliveryoptimization-agent deliveryoptimization-sdk curl"
+# ADUC depends on azure-iot-sdk-c, azure-sdk-for-cpp DO Agent SDK, and curl
+DEPENDS = "azure-iot-sdk-c azure-sdk-for-cpp deliveryoptimization-agent deliveryoptimization-sdk curl"
 
 inherit cmake useradd
 
@@ -175,7 +175,6 @@ python do_registerAgentExtensions() {
         contentDownloaderRegistrationDirectory = d.getVar("ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR")
         downloadHandlerRegistrationDirectory = d.getVar("ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR")
 
-        register_content_handler("microsoft/swupdate:1", "{}/libmicrosoft_swupdate_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/swupdate:2", "{}/libmicrosoft_swupdate_2.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/update-manifest", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/update-manifest:4", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
