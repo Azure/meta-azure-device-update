@@ -1,5 +1,5 @@
 # Generates a text file with the ADU applicability info
-# for manufacturer and model and copies/installs that file into the image.
+# for manufacturer and model and copys and installs that file into the image.
 
 # Environment variables that can be used to configure the behaviour of this recipe.
 # MANUFACTURER          The manufacturer string that will be written to the manufacturer
