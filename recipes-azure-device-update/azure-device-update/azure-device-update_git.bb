@@ -5,7 +5,9 @@
 #                           Default: git://github.com/Azure/iot-hub-device-update
 #            
 # ADUC_GIT_BRANCH       Changes the branch that ADU code is pulled from.
-#                           Default: main
+#                           Default: develop
+#
+# ADU_GIT_COMMIT        Changes to the commit from which to checkout the adu code.
 #
 # BUILD_TYPE            Changes the type of build produced by this recipe.
 #                       Valid values are Debug, Release, RelWithDebInfo, and MinRelSize.
@@ -13,13 +15,12 @@
 
 LICENSE = "CLOSED"
 
-ADU_GIT_BRANCH ?= "main"
+ADU_GIT_BRANCH ?= "develop"
 
 ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
 SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 
-ADU_GIT_COMMIT ?= "79ce3ba24c411d3b014226cd869e2b2d02159a20"
-SRC_URI += "file://0001-Fixup-compilation-error.patch"
+ADU_GIT_COMMIT ?= "60bb98ae3631419b393c528f7dc3cf0797b231e6"
 
 SRCREV = "${ADU_GIT_COMMIT}"
 
@@ -31,9 +32,9 @@ DEPENDS = "azure-iot-sdk-c azure-sdk-for-cpp deliveryoptimization-agent delivery
 
 inherit cmake useradd
 
-#OpenSSL3.0 is not yet supported in HEAD commit on main branch
+#OpenSSL3.0 is not supported in all branches
 # -- Ignore warnings for now...
-TARGET_CFLAGS:append = " -Wno-error=deprecated-declarations"
+TARGET_CFLAGS:append =   " -Wno-error=deprecated-declarations" 
 TARGET_CPPFLAGS:append = " -Wno-error=deprecated-declarations"
 TARGET_CXXFLAGS:append = " -Wno-error=deprecated-declarations"
 
