@@ -17,10 +17,10 @@ LICENSE = "CLOSED"
 
 ADU_GIT_BRANCH ?= "develop"
 
-ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
+ADU_SRC_URI ?= "git://github.com/Azure/device-update"
 SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 
-ADU_GIT_COMMIT ?= "60bb98ae3631419b393c528f7dc3cf0797b231e6"
+ADU_GIT_COMMIT ?= "85b560374dfb175abe8b6da8facbc2101aec6752"
 
 SRCREV = "${ADU_GIT_COMMIT}"
 
