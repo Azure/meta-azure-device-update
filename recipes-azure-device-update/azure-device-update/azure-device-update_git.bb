@@ -2,33 +2,35 @@
 
 # Environment variables that can be used to configure the behavior of this recipe.
 # ADUC_GIT_URL          Changes the URL of github repository that ADU code is pulled from.
-#                           Default: git://github.com/Azure/iot-hub-device-update
-#            
+#                           Default: git://git@github.com:/Azure/device-update.git
+#                       Note: This value is not used if SRC_URI is set.
+#                       Note: The build machine this comes form MUST have access to the repository.
 # ADUC_GIT_BRANCH       Changes the branch that ADU code is pulled from.
-#                           Default: develop
-#
+#                           Default: main
+#                       Note: This value is not used if ADUC_GIT_BRANCH is set.
 # ADU_GIT_COMMIT        Changes to the commit from which to checkout the adu code.
-#
+#                       Note: This value is not used if ADU_GIT_COMMIT is set. Otherwise it is the latest commit in the branch and repo.
 # BUILD_TYPE            Changes the type of build produced by this recipe.
 #                       Valid values are Debug, Release, RelWithDebInfo, and MinRelSize.
 #                       These values are the same as the CMAKE_BUILD_TYPE variable.
+#                       Note: This value is not used if BUILD_TYPE is set.
 
 LICENSE = "CLOSED"
 
-ADU_GIT_BRANCH ?= "develop"
+ADU_GIT_BRANCH ?= "main"
 
-ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
-SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
+ADU_SRC_URI ?= "git://git@github.com:/Azure/device-update.git"
+SRC_URI = "${ADU_SRC_URI};protocol=ssh;branch=${ADU_GIT_BRANCH}"
 
-ADU_GIT_COMMIT ?= "60bb98ae3631419b393c528f7dc3cf0797b231e6"
+ADU_GIT_COMMIT ?= "${AUTOREV}"
 
 SRCREV = "${ADU_GIT_COMMIT}"
 
 PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git" 
 
-# ADUC depends on azure-iot-sdk-c, azure-sdk-for-cpp DO Agent SDK, and curl
-DEPENDS = "azure-iot-sdk-c azure-sdk-for-cpp deliveryoptimization-agent deliveryoptimization-sdk curl"
+# ADUC depends on azure-iot-sdk-c, DO Agent SDK, curl, and libmosquitto-dev
+DEPENDS = "azure-iot-sdk-c deliveryoptimization-agent deliveryoptimization-sdk curl mosquitto pkgconfig-native"
 
 inherit cmake useradd
 
@@ -46,10 +48,6 @@ EXTRA_OECMAKE += "-DADUC_WARNINGS_AS_ERRORS=OFF"
 EXTRA_OECMAKE += "-DADUC_PLATFORM_LAYER=linux"
 # Integrate with SWUpdate as the installer
 EXTRA_OECMAKE += "-DADUC_CONTENT_HANDLERS=microsoft/swupdate"
-# Set the path to the manufacturer file
-EXTRA_OECMAKE += "-DADUC_MANUFACTURER_FILE=${sysconfdir}/adu-manufacturer"
-# Set the path to the model file
-EXTRA_OECMAKE += "-DADUC_MODEL_FILE=${sysconfdir}/adu-model"
 # Set the path to the version file
 EXTRA_OECMAKE += "-DADUC_VERSION_FILE=${sysconfdir}/adu-version"
 # Use zlog as the logging library.
@@ -74,7 +72,7 @@ EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 # adu-log-dir - to create the temporary log directory in the image.
 # deliveryoptimization-agent-service - to install the delivery optimization agent for downloads.
 # curl - for running the diagnostics component
-RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service azure-device-update-diffs curl openssl-bin nss ca-certificates"
+RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service azure-device-update-diffs curl openssl-bin nss ca-certificates libmosquitto1"
 
 ADUC_DATA_DIR ?= "/var/lib/adu"
 ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
@@ -113,7 +111,6 @@ USERADD_PARAM:${PN} = "\
     "
 
 do_compile[depends] += "azure-iot-sdk-c:do_prepare_recipe_sysroot"
-do_compile[depends] += "azure-sdk-for-cpp:do_prepare_recipe_sysroot"
 
 do_install:append() {
     #create ADUC_DATA_DIR

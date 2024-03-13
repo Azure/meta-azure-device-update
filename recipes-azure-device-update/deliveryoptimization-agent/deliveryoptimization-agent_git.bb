@@ -1,6 +1,12 @@
 # Build and install Delivery Optimization Simple Client.
 
 # Environment variables that can be used to configure the behaviour of this recipe.
+# DO_GIT_BRANCH         The branch of the Delivery Optimization Simple Client repository to use.
+#                       Note: This value is only used if DO_GIT_BRANCH is not set. 
+# DO_SRC_URI            The URI of the Delivery Optimization Simple Client repository to use.
+#                       Note: This vlaue is only used if DO_SRC_URI is not set
+# DO_GIT_COMMIT         The commit of the Delivery Optimization Simple Client repository to use.
+#                       Note: This value is only used if DO_GIT_COMMIT is not set.
 # BUILD_TYPE            Changes the type of build produced by this recipe.
 #                       Valid values are Debug, Release, RelWithDebInfo, and MinRelSize.
 #                       These values are the same as the CMAKE_BUILD_TYPE variable.
@@ -12,7 +18,7 @@ DO_GIT_BRANCH ?= "develop"
 DO_SRC_URI ?= "git://github.com/microsoft/do-client"
 SRC_URI = "${DO_SRC_URI};protocol=https;branch=${DO_GIT_BRANCH}"
 
-DO_GIT_COMMIT ?= "98919b269e375f2ee317f0f1d91e655b91800a04"
+DO_GIT_COMMIT ?= "8362e36bb990914bb3f69a08f50f383612983002"
 SRCREV = "${DO_GIT_COMMIT}"
 
 PV = "1.0+git${SRCPV}"
