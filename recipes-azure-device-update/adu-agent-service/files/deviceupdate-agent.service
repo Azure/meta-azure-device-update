@@ -10,9 +10,9 @@ RestartSec=5
 User=adu
 Group=adu
 # We can check logs with journalctl -f -u deviceupdate-agent.service --no-tail
-# For development purposes, set log verbosity level to 'Debug' (-l 0) and enable IoT Hub tracing (-1).
+# For development purposes, set log verbosity level to 'Debug' (-l 0).
 # For production, set log verbosity level to 'Info' (-l 1) to improve performance.
-ExecStart=/usr/bin/AducIotAgent -l 0 -e
+ExecStart=/usr/bin/AducIotAgent -l 0
 
 [Install]
 WantedBy=multi-user.target
