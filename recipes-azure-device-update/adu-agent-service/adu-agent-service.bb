@@ -22,4 +22,4 @@ DEPENDS = "azure-device-update deliveryoptimization-agent-service"
 
 RDEPENDS:${PN} += "azure-device-update deliveryoptimization-agent-service"
 
-inherit allarch systemd
+inherit allarch systemd features_check

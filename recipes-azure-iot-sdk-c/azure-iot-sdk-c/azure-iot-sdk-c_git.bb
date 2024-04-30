@@ -7,9 +7,9 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=4283671594edec4c13aeb073c219237a"
 
 # We pull from main branch in order to get PnP APIs
-SRC_URI = "gitsm://github.com/Azure/azure-iot-sdk-c.git;branch=main"
+SRC_URI = "gitsm://github.com/Azure/azure-iot-sdk-c.git;protocol=https;branch=main"
 
-SRCREV = "7329f70906180fd7da1f8b47fb9f8cd39a8ef1ff"
+SRCREV = "021212f84f3014709f11314a829e22bc537c11e2"
 PV = "1.0+git${SRCPV}"
 
 S = "${WORKDIR}/git"
@@ -22,11 +22,22 @@ inherit cmake
 # Do not use amqp since it is deprecated.
 # Do not build sample code to save build time.
 # use_http: required uhttp for eis_utils
-EXTRA_OECMAKE += "-Duse_amqp:BOOL=OFF -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Dskip_samples:BOOL=ON -Dbuild_service_client:BOOL=OFF -Dbuild_provisioning_service_client:BOOL=OFF"
+EXTRA_OECMAKE += "-Duse_amqp:BOOL=OFF -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Dskip_samples:BOOL=ON -Dbuild_service_client:BOOL=OFF -Dbuild_provisioning_service_client:BOOL=OFF -Duse_prov_client:BOOL=OFF"
 
 sysroot_stage_all:append () {
     sysroot_stage_dir ${D}${exec_prefix}/cmake ${SYSROOT_DESTDIR}${exec_prefix}/cmake
 }
+
+#Placeholder file so do_rootfs / libdnf do not complain when packages-split/${PN} is empty
+do_install:append(){
+	install -d ${D}
+	echo "This package is linked against during compilation" > ${D}/azure-iot-sdk-c-placeholder-file
+	echo "Therefore, there is nothing to install on the target" >> ${D}/azure-iot-sdk-c-placeholder-file
+}
+
+FILES:${PN} += " \
+	/azure-iot-sdk-c-placeholder-file \
+"
 
 FILES:${PN}-dev += "${exec_prefix}/cmake"
 
