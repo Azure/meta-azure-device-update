@@ -18,6 +18,9 @@ SRCREV = "${DO_GIT_COMMIT}"
 PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git" 
 
+
+SRC_URI += "file://do_fstream_patch_for_static_function.patch"
+
 DEPENDS = "boost curl libproxy msft-gsl"
 
 inherit cmake

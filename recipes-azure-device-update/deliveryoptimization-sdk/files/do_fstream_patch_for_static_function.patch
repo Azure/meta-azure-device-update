@@ -1,0 +1,12 @@
+diff --git a/sdk-cpp/src/internal/rest/util/do_port_finder.h b/sdk-cpp/src/internal/rest/util/do_port_finder.h
+index 7ae2fbd..f0362c8 100644
+--- a/sdk-cpp/src/internal/rest/util/do_port_finder.h
++++ b/sdk-cpp/src/internal/rest/util/do_port_finder.h
+@@ -2,6 +2,7 @@
+ #define _DELIVERY_OPTIMIZATION_DO_PORT_FINDER_H
+ 
+ #include <string>
++#include <fstream>
+ 
+ namespace microsoft
+ {
