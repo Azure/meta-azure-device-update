@@ -19,7 +19,6 @@ S = "${WORKDIR}/git"
 
 SRC_URI += "file://Findlibproxy.cmake.patch"
 SRC_URI += "file://Findglib-2.0.cmake.patch"
-SRC_URI += "file://CMakeLists.txt.patch"
 
 DEPENDS = "boost curl libproxy msft-gsl glib-2.0"
 

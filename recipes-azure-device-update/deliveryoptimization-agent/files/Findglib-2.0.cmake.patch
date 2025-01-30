@@ -1,5 +1,21 @@
---- ./common/cmake/Findglib-2.0.cmake	2024-08-01 04:51:25.988473685 +0000
-+++ ./common/cmake/Findglib-2.0.1.cmake	2024-08-01 17:41:10.582683802 +0000
+From 9cd91b89294909939da065a7db24f3bee1e242bf Mon Sep 17 00:00:00 2001
+From: nihemstr <nihemstr@microsoft.com>
+Date: Tue, 6 Aug 2024 14:53:19 +0000
+Subject: [PATCH] Migrated device update meta layer to scarthgap
+
+---
+
+Upstream-Status: Pending
+
+ common/cmake/Findglib-2.0.1.cmake | 49 +++++++++++++++++++++++++++++++
+ 1 file changed, 49 insertions(+)
+ create mode 100644 common/cmake/Findglib-2.0.1.cmake
+
+diff --git a/common/cmake/Findglib-2.0.1.cmake b/common/cmake/Findglib-2.0.1.cmake
+new file mode 100644
+index 0000000..b6a3699
+--- /dev/null
++++ b/common/cmake/Findglib-2.0.1.cmake
 @@ -0,0 +1,49 @@
 +# Copyright (c) Microsoft Corporation.
 +# Licensed under the MIT License.
