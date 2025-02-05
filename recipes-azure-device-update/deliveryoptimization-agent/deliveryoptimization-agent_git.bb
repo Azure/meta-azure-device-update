@@ -22,6 +22,7 @@ SRC_URI += "file://Findglib-2.0.cmake.patch"
 SRC_URI += "file://0001-Fix-incomplete-type-std-array-in-do_date_time.h.patch"
 SRC_URI += "file://0001-add-std-array-include-in-download-cpp.patch"
 SRC_URI += "file://0001-fix-array-incl-in-http_agent-cpp.patch"
+SRC_URI += "file://0001-incl-array-in-do-guid-cpp.patch"
 
 DEPENDS = "boost curl libproxy msft-gsl glib-2.0"
 
