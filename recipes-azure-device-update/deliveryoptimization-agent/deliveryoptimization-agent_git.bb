@@ -11,7 +11,7 @@ DO_GIT_BRANCH ?= "develop"
 
 DO_SRC_URI ?= "git://github.com/microsoft/do-client"
 SRC_URI = "${DO_SRC_URI};protocol=https;branch=${DO_GIT_BRANCH}"
-DO_GIT_COMMIT ?= "8362e36bb990914bb3f69a08f50f383612983002"
+DO_GIT_COMMIT ?= "b61de2d347c8032562056b18f90ec710e531baf8"
 SRCREV = "${DO_GIT_COMMIT}"
 
 PV = "1.0+git${SRCPV}"
