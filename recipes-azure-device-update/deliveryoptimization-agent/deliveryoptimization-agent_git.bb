@@ -36,6 +36,9 @@ EXTRA_OECMAKE += "-DDO_BUILD_TESTS=OFF"
 # Specify build is for deliveryoptimization-agent
 EXTRA_OECMAKE += "-DDO_INCLUDE_AGENT=ON"
 
+# DO recipes having trouble finding glib-object.h so modify cmake include path.
+EXTRA_OECMAKE += "-DCMAKE_INCLUDE_PATH=${WORKDIR}/recipe-sysroot/usr/include/glib-2.0"
+
 EXTRA_OECMAKE += "-DCMAKE_PREFIX_PATH=${WORKDIR}/recipe-sysroot/usr/"
 # EXTRA_OECMAKE += "-DCMAKE_INCLUDE_PATH=${WORKDIR}/recipe-sysroot/usr/include/"
 # EXTRA_OECMAKE += "-DCMAKE_LIBRARY_PATH=${WORKDIR}/recipe-sysroot/usr/lib"
