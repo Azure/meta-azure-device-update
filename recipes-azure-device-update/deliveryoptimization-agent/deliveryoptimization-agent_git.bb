@@ -20,6 +20,7 @@ S = "${WORKDIR}/git"
 SRC_URI += "file://Findlibproxy.cmake.patch"
 SRC_URI += "file://Findglib-2.0.cmake.patch"
 SRC_URI += "file://0001-Fix-incomplete-type-std-array-in-do_date_time.h.patch"
+SRC_URI += "file://0001-add-std-array-include-in-download-cpp.patch"
 
 DEPENDS = "boost curl libproxy msft-gsl glib-2.0"
 
