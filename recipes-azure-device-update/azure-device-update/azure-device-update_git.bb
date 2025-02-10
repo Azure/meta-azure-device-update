@@ -74,7 +74,9 @@ EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 # adu-log-dir - to create the temporary log directory in the image.
 # deliveryoptimization-agent-service - to install the delivery optimization agent for downloads.
 # curl - for running the diagnostics component
-RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service azure-device-update-diffs curl openssl-bin nss ca-certificates"
+#RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service azure-device-update-diffs curl openssl-bin nss ca-certificates"
+# Temporarily remove runtime dep on delta update diffs
+RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
 
 ADUC_DATA_DIR ?= "/var/lib/adu"
 ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
