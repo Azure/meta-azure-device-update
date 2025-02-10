@@ -1,0 +1,35 @@
+From f8d8519f8e09ce1aaf6d023a4357a1f5fd42793f Mon Sep 17 00:00:00 2001
+From: jw-msft <84477130+jw-msft@users.noreply.github.com>
+Date: Wed, 5 Feb 2025 23:39:08 +0000
+Subject: [PATCH] add glib incl paths client-lite CMakeLists.txt
+
+---
+ client-lite/CMakeLists.txt | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/client-lite/CMakeLists.txt b/client-lite/CMakeLists.txt
+index 621f81f..25d0e52 100644
+--- a/client-lite/CMakeLists.txt
++++ b/client-lite/CMakeLists.txt
+@@ -96,6 +96,11 @@ add_platform_interface_definitions(docs_common)
+ target_link_libraries(docs_common PUBLIC dohttp doversion ${CURL_LIBRARIES})
+ target_include_directories(docs_common PUBLIC ${docs_common_includes})
+ if (DO_PROXY_SUPPORT)
++    # Add GLib include paths
++    include_directories(${CMAKE_SYSROOT}/usr/include/glib-2.0)
++
++    include_directories(${CMAKE_SYSROOT}/usr/lib/glib-2.0/include)
++
+     target_compile_definitions(docs_common PRIVATE DO_PROXY_SUPPORT)
+     target_link_libraries(docs_common PUBLIC libproxy::proxy)
+ endif ()
+@@ -164,4 +169,4 @@ endif() # Linux
+ 
+ if(DO_BUILD_TESTS)
+     add_subdirectory (test)
+-endif()
+\ No newline at end of file
++endif()
+-- 
+2.25.1
+

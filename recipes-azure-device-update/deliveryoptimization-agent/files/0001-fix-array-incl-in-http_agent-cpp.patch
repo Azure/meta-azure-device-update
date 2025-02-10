@@ -1,0 +1,25 @@
+From d7579dfb771be935a238692640fd492c78df455f Mon Sep 17 00:00:00 2001
+From: jw-msft <84477130+jw-msft@users.noreply.github.com>
+Date: Wed, 5 Feb 2025 21:15:43 +0000
+Subject: [PATCH] fix array incl in http_agent cpp
+
+---
+ client-lite/src/util/http_agent.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/client-lite/src/util/http_agent.cpp b/client-lite/src/util/http_agent.cpp
+index 2944b5f..660888f 100644
+--- a/client-lite/src/util/http_agent.cpp
++++ b/client-lite/src/util/http_agent.cpp
+@@ -13,6 +13,8 @@
+ #include "do_http_defines.h"
+ #include "safe_int.h"
+ 
++#include <array>
++
+ // TBD version
+ #define DO_USER_AGENT_STR   "Microsoft-Delivery-Optimization-Lite/10.0.0.1"
+ 
+-- 
+2.25.1
+

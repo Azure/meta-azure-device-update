@@ -11,7 +11,7 @@ DO_GIT_BRANCH ?= "develop"
 
 DO_SRC_URI ?= "git://github.com/microsoft/do-client"
 SRC_URI = "${DO_SRC_URI};protocol=https;branch=${DO_GIT_BRANCH}"
-DO_GIT_COMMIT ?= "8362e36bb990914bb3f69a08f50f383612983002"
+DO_GIT_COMMIT ?= "b61de2d347c8032562056b18f90ec710e531baf8"
 SRCREV = "${DO_GIT_COMMIT}"
 
 PV = "1.0+git${SRCPV}"
@@ -19,7 +19,11 @@ S = "${WORKDIR}/git"
 
 SRC_URI += "file://Findlibproxy.cmake.patch"
 SRC_URI += "file://Findglib-2.0.cmake.patch"
-SRC_URI += "file://CMakeLists.txt.patch"
+SRC_URI += "file://0001-Fix-incomplete-type-std-array-in-do_date_time.h.patch"
+SRC_URI += "file://0001-add-std-array-include-in-download-cpp.patch"
+SRC_URI += "file://0001-fix-array-incl-in-http_agent-cpp.patch"
+SRC_URI += "file://0001-incl-array-in-do-guid-cpp.patch"
+SRC_URI += "file://0001-add-glib-incl-paths-client-lite-CMakeLists.txt.patch"
 
 DEPENDS = "boost curl libproxy msft-gsl glib-2.0"
 
@@ -32,6 +36,9 @@ EXTRA_OECMAKE += "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 EXTRA_OECMAKE += "-DDO_BUILD_TESTS=OFF"
 # Specify build is for deliveryoptimization-agent
 EXTRA_OECMAKE += "-DDO_INCLUDE_AGENT=ON"
+
+# DO recipes having trouble finding glib-object.h so modify cmake include path.
+EXTRA_OECMAKE += "-DCMAKE_INCLUDE_PATH=${WORKDIR}/recipe-sysroot/usr/include/glib-2.0"
 
 EXTRA_OECMAKE += "-DCMAKE_PREFIX_PATH=${WORKDIR}/recipe-sysroot/usr/"
 # EXTRA_OECMAKE += "-DCMAKE_INCLUDE_PATH=${WORKDIR}/recipe-sysroot/usr/include/"
