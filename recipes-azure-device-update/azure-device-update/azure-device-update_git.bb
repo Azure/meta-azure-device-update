@@ -30,8 +30,8 @@ LICENSE = "CLOSED"
 # ADU_AGENT_GEN ?= "1"
 
 # Using Gen2 for now. TODO: allow switching between gen1 and gen2 via ADU_AGENT_GEN env var
-ADU_GIT_BRANCH ?= "user/jw-msft/fixpostinst-ubuntu2004"
-ADU_GIT_COMMIT ?= "0886eb87992a90c5ef1416758fafe6b5aeabbb26"
+ADU_GIT_BRANCH ?= "main"
+ADU_GIT_COMMIT ?= "e981f7a9af5f561f98a3be9ea9563f4d0f256e63"
 ADU_SRC_URI ?= "git://github.com/Azure/device-update"
 
 SRC_URI = "${ADU_SRC_URI};protocol=ssh;branch=${ADU_GIT_BRANCH}"
