@@ -288,10 +288,10 @@ fakeroot python do_registerAgentExtensions() {
         register_content_handler("microsoft/update-manifest:5", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/steps:1", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/script:1", "{}/libmicrosoft_script_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
-	# TODO: re-enable DO content downloader once available again upstream
+        # TODO: re-enable DO content downloader once available again upstream
         #register_content_downloader("{}/libdeliveryoptimization_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
         register_content_downloader("{}/libcurl_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
-	# TODO: re-enable delta here once patches for recipe is done
+        # TODO: re-enable delta here once patches for recipe is done
         #register_download_handler("microsoft/delta:1", "{}/libmicrosoft_delta_download_handler.so".format(extensionInstallDir), downloadHandlerRegistrationDirectory, workDir)
 
     except Exception as ex:
