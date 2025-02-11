@@ -3,7 +3,7 @@
 # Environment variables that can be used to configure the behavior of this recipe.
 # ADUC_GIT_URL          Changes the URL of github repository that ADU code is pulled from.
 #                           Default: git://github.com/Azure/iot-hub-device-update
-#            
+#
 # ADUC_GIT_BRANCH       Changes the branch that ADU code is pulled from.
 #                           Default: develop
 #
@@ -15,26 +15,110 @@
 
 LICENSE = "CLOSED"
 
-ADU_GIT_BRANCH ?= "develop"
+# Defaults for Gen1
+# These will not be set to the values seen here if these are already set
+# in the environment's variables.
+#
+# # The release come out of develop branch, not main.
+# ADU_GIT_BRANCH ?= "develop"
+# ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
+# SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
+# ADU_GIT_COMMIT ?= "60bb98ae3631419b393c528f7dc3cf0797b231e6"
+# # CMake build types: "Release" "RelWithDebInfo" "MinSizeRel"
+# BUILD_TYPE ?= "Debug"
+# # The agent generation. Can be "1" or "2". Gen1 uses IoTHub. Gen2 uses any MQTT broker.
+# ADU_AGENT_GEN ?= "1"
 
-ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
-SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
+# Using Gen2 for now. TODO: allow switching between gen1 and gen2 via ADU_AGENT_GEN env var
+ADU_GIT_BRANCH ?= "user/jw-msft/fixpostinst-ubuntu2004"
+ADU_GIT_COMMIT ?= "0886eb87992a90c5ef1416758fafe6b5aeabbb26"
+ADU_SRC_URI ?= "git://github.com/Azure/device-update"
 
-ADU_GIT_COMMIT ?= "60bb98ae3631419b393c528f7dc3cf0797b231e6"
+SRC_URI = "${ADU_SRC_URI};protocol=ssh;branch=${ADU_GIT_BRANCH}"
+
+#################################################
+# BEGIN - patch to make finding libmosquitto work in du agent repo cmake:
+#
+# This is to bring in patch to add additional cmake function for finding libmosquitto to make it
+# work for yocto recipe.
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+# Add the Findmosquitto.cmake file to your source
+SRC_URI += "file://Findmosquitto.cmake"
+# Copy the find module during configure
+do_configure:prepend() {
+    mkdir -p ${S}/cmake/modules/
+    cp ${WORKDIR}/Findmosquitto.cmake ${S}/cmake/modules/
+}
+# Add to your existing EXTRA_OECMAKE variables
+EXTRA_OECMAKE += "-DCMAKE_MODULE_PATH=${S}/cmake/modules"
+#
+# END - patch to make finding libmosquitto work in du agent repo cmake:
+#################################################
+
+# # Override defaults with those for Gen2 if ADU_AGENT_GEN is "2" AND not present in environment vars
+# fakeroot python() {
+#     # ADU_GIT_BRANCH ?= "main"
+#    # ADU_SRC_URI ?= "git://github.com/Azure/device-update"
+#    # SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
+#    # ADU_GIT_COMMIT ?= "5041bf8fc30aaea5098a5378e804a7f7fae7c902"
+#    if d.getVar("ADU_AGENT_GEN") == "2":
+#        git_url = "git://github.com/Azure/device-update"
+#        git_branch = "main"
+#        git_commit = "5041bf8fc30aaea5098a5378e804a7f7fae7c902"
+#
+#        if not d.getVar("ADU_GIT_BRANCH", True):
+#            bb.note(f"  *** Setting ADU_GIT_BRANCH to: {git_branch}")
+#            d.setVar("ADU_GIT_BRANCH", git_branch)
+#
+#        if not d.getVar("ADU_GIT_URL", True):
+#            bb.note(f"  *** Setting ADU_GIT_URL to: {git_url}")
+#            d.setVar("ADU_GIT_URL", git_url)
+#
+#        if not d.getVar("ADU_GIT_COMMIT", True):
+#            bb.note(f"  *** Setting ADU_GIT_COMMIT to: {git_commit}")
+#            d.setVar("ADU_GIT_COMMIT", git_commit)
+#}
 
 SRCREV = "${ADU_GIT_COMMIT}"
 
-PV = "1.0+git${SRCPV}"
-S = "${WORKDIR}/git" 
+PV = "1.1+git${SRCPV}"
+S = "${WORKDIR}/git"
 
-# ADUC depends on azure-iot-sdk-c, azure-sdk-for-cpp DO Agent SDK, and curl
-DEPENDS = "azure-iot-sdk-c azure-sdk-for-cpp deliveryoptimization-agent deliveryoptimization-sdk curl"
+# DEPENDS are the build-time dependencies that must be built
+# and available BEFORE the current recipe can be built.
+#
+# Common Build Dependencies are:
+# curl, DO agent, and DO SDK
+# Gen2 requires mosquitto recipe from openembedded meta-networking layer
+DEPENDS = "deliveryoptimization-agent deliveryoptimization-sdk curl azure-iot-sdk-c mosquitto"
+
+# Append to the build-time dependencies as per differences between Gen1 and Gen2
+#
+# Generation 2 needs these to build:
+#     mosquitto-dev          -->  for communicating to MQTT Brokers such as
+#                                 Azure Event Grid or Mosquitto Server.
+#
+# Handling mosquitto-dev installation via install-deps.sh for now, but
+# need to actually make it into recipe to ensure it's pinned to the correct
+# version. Note: there is no runtime dep on mosquitto because mosquitto
+# client is statically linked.
+# d.appendVar('DEPENDS', ' mosquitto-dev')
+#
+# Generation 1 Additional BUILD Dependencies are:
+#     azure-iot-sdk-c        -->  for communicating with IoT Hub
+#     and azure-sdk-for-cpp  -->  for diagnostics
+#python() {
+#    agent_gen = d.getVar('ADU_AGENT_GEN')
+#    if agent_gen != "2":
+#        d.appendVar('DEPENDS', ' azure-iot-sdk-c')
+#        d.appendVar('DEPENDS', ' azure-sdk-for-cpp')
+#}
 
 inherit cmake useradd
 
 #OpenSSL3.0 is not supported in all branches
 # -- Ignore warnings for now...
-TARGET_CFLAGS:append =   " -Wno-error=deprecated-declarations" 
+TARGET_CFLAGS:append =   " -Wno-error=deprecated-declarations"
 TARGET_CPPFLAGS:append = " -Wno-error=deprecated-declarations"
 TARGET_CXXFLAGS:append = " -Wno-error=deprecated-declarations"
 
@@ -63,19 +147,25 @@ EXTRA_OECMAKE += "-DADUC_CONF_FOLDER=/adu"
 EXTRA_OECMAKE += "-DADUC_INSTALL_DAEMON=OFF"
 # cpprest installs its config.cmake file in a non-standard location.
 # Tell cmake where to find it.
-EXTRA_OECMAKE += "-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake"
+#
+##EXTRA_OECMAKE += "-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake"
+#
 # Using the installed DO SDK include files.
 EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
-
 EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+
+# RDEPENDS are the RUNTIME dependencies that must be installed on the target
+# system for the cuurent package to function correctly.
+#
 # bash - for running shell scripts for install.
 # swupdate - to install update package.
 # adu-pub-key - to install public key for update package verification.
 # adu-log-dir - to create the temporary log directory in the image.
 # deliveryoptimization-agent-service - to install the delivery optimization agent for downloads.
 # curl - for running the diagnostics component
-#RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service azure-device-update-diffs curl openssl-bin nss ca-certificates"
+#
 # Temporarily remove runtime dep on delta update diffs
+#RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service azure-device-update-diffs curl openssl-bin nss ca-certificates"
 RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
 
 ADUC_DATA_DIR ?= "/var/lib/adu"
@@ -105,7 +195,7 @@ GROUPADD_PARAM:${PN} = "\
 
 # USERADD_PARAM specifies command line options to pass to the
 # useradd command. Multiple users can be created by separating
-# the commands with a semicolon. 
+# the commands with a semicolon.
 # Here we'll create 'adu' user, and 'do' user.
 # To download the update payload file, 'adu' user must be a member of 'do' group.
 # To save downloaded file into 'adu' downloads directory, 'do' user must be a member of 'adu' group.
@@ -115,7 +205,7 @@ USERADD_PARAM:${PN} = "\
     "
 
 do_compile[depends] += "azure-iot-sdk-c:do_prepare_recipe_sysroot"
-do_compile[depends] += "azure-sdk-for-cpp:do_prepare_recipe_sysroot"
+#do_compile[depends] += "azure-sdk-for-cpp:do_prepare_recipe_sysroot"
 
 do_install:append() {
     #create ADUC_DATA_DIR
@@ -198,8 +288,11 @@ fakeroot python do_registerAgentExtensions() {
         register_content_handler("microsoft/update-manifest:5", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/steps:1", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/script:1", "{}/libmicrosoft_script_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
-        register_content_downloader("{}/libdeliveryoptimization_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
-        register_download_handler("microsoft/delta:1", "{}/libmicrosoft_delta_download_handler.so".format(extensionInstallDir), downloadHandlerRegistrationDirectory, workDir)
+	# TODO: re-enable DO content downloader once available again upstream
+        #register_content_downloader("{}/libdeliveryoptimization_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
+        register_content_downloader("{}/libcurl_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
+	# TODO: re-enable delta here once patches for recipe is done
+        #register_download_handler("microsoft/delta:1", "{}/libmicrosoft_delta_download_handler.so".format(extensionInstallDir), downloadHandlerRegistrationDirectory, workDir)
 
     except Exception as ex:
         errorMessage = "Failed to create DU Agent extension registration. An exception of type {0} occurred with message:\n{1} and Arguments:\n{2!r}".format(type(ex).__name__, str(ex), ex.args)
@@ -237,7 +330,7 @@ def create_handlerRegistration(handlerId, handlerFileInstallPath, handlerExtensi
         raise ValueError("Cannot generate ADU handler registration, the specified path does not exist: {}".format(handlerFileWorkingPath))
 
     # Get the file size
-    registrationProperties["sizeInBytes"] = os.path.getsize(handlerFileWorkingPath) 
+    registrationProperties["sizeInBytes"] = os.path.getsize(handlerFileWorkingPath)
 
     # Calculate the file hash
     with open(handlerFileWorkingPath, "rb") as handler:

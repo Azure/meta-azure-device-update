@@ -7,7 +7,7 @@
 
 LICENSE = "CLOSED"
 
-DO_GIT_BRANCH ?= "develop"
+DO_GIT_BRANCH ?= "main"
 
 DO_SRC_URI ?= "git://github.com/microsoft/do-client"
 SRC_URI = "${DO_SRC_URI};protocol=https;branch=${DO_GIT_BRANCH}"
