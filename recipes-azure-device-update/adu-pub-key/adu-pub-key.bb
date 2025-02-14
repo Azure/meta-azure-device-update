@@ -16,6 +16,15 @@ DEPENDS = "openssl-native"
 # ADUC_PRIVATE_KEY is the build host path to the .pem private key file to use to sign the image.
 # ADUC_PRIVATE_KEY_PASSWORD is the build host path to the .pass password file for the private key.
 
+do_configure() {
+    if [ -z "${ADUC_PRIVATE_KEY}" ]; then
+        bbfatal "The environment variable 'ADUC_PRIVATE_KEY' is not set or not included in BB_ENV_PASSTHROUGH_ADDITIONS."
+    fi
+    if [ -z "${ADUC_PRIVATE_KEY_PASSWORD}" ]; then
+        bbfatal "The environment variable 'ADUC_PRIVATE_KEY_PASSWORD' is not set or not included in BB_ENV_PASSTHROUGH_ADDITIONS."
+    fi
+}
+
 # Generate the public key file using openssl, private key, and password file.
 do_compile() {
     openssl rsa -in ${ADUC_PRIVATE_KEY} -passin file:${ADUC_PRIVATE_KEY_PASSWORD} -out public.pem -outform PEM -pubout
