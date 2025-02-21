@@ -25,7 +25,7 @@ ADU_GENERATION ?= "1"
 
 # For gen1, the release come out of develop branch, not main.
 ADU_GIT_BRANCH ?= "develop"
-ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
+ADU_SRC_URI ?= "https://github.com/Azure/iot-hub-device-update"
 SRC_URI ?= "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 ADU_GIT_COMMIT ?= "350a551dd9d3f5639eddceb75ef5b10e834865fe"
 # CMake build types: "Release" "RelWithDebInfo" "MinSizeRel"
@@ -36,7 +36,7 @@ WITH_FEATURE_DELTA_UPDATE ?= "0"
 python() {
     try:
         adu_gen = d.getVar("ADU_GENERATION")
-        if adu_gen != "1" && adu_gen != "2":
+        if adu_gen != "1" and adu_gen != "2":
             bb.fatal(f"Invalid value '{adu_gen}' for ADU_GENERATION. Only '1' and '2' are allowed.")
         bb.note(f"Using adu_gen '{adu_gen}'")
 
@@ -104,8 +104,9 @@ S = "${WORKDIR}/git"
 # curl, DO agent, and DO SDK
 # Gen2 requires mosquitto recipe from openembedded meta-networking layer
 DEPENDS = "deliveryoptimization-agent deliveryoptimization-sdk curl azure-iot-sdk-c"
-DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-iot-sdk-c azure-sdk-for-cpp', '')}" # gen1-only
-DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '2', 'mosquitto', '')}"                         # gen2-only
+DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-iot-sdk-c', '', d)}"
+DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp', '', d)}"
+DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '2', 'mosquitto', '', d)}"
 
 # Append to the build-time dependencies as per differences between Gen1 and Gen2
 #
@@ -156,7 +157,7 @@ EXTRA_OECMAKE += "-DADUC_INSTALL_DAEMON=OFF"
 EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
 EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 # cpprest installs its config.cmake file in a non-standard location.
-EXTRA_OECMAKE += "${@bb.utils.contains('ADU_GENERATION', '1', '-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake', '', d)}"  # gen1-only
+EXTRA_OECMAKE += "${@bb.utils.contains('ADU_GENERATION', '1', '-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake', '', d)}"
 
 # RDEPENDS are the RUNTIME dependencies that must be installed on the target
 # system for the cuurent package to function correctly.
@@ -209,7 +210,7 @@ USERADD_PARAM:${PN} = "\
     "
 
 do_compile[depends] += "azure-iot-sdk-c:do_prepare_recipe_sysroot"
-do_compile[depends] += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp:do_prepare_recipe_sysroot', '')}"  # gen1-only
+do_compile[depends] += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp:do_prepare_recipe_sysroot', '', d)}"
 
 do_install:append() {
     #create ADUC_DATA_DIR
