@@ -14,6 +14,8 @@
 #                       These values are the same as the CMAKE_BUILD_TYPE variable.
 
 LICENSE = "CLOSED"
+SUMMARY = "Azure Device Update agent for embedded GNU/Linux devices"
+MAINTAINER = "Microsoft Azure Device Update"
 
 # Defaults for Gen1
 # These will not be set to the values seen here if these are already set
@@ -25,8 +27,8 @@ ADU_GENERATION ?= "1"
 
 # For gen1, the release come out of develop branch, not main.
 ADU_GIT_BRANCH ?= "develop"
-ADU_SRC_URI ?= "https://github.com/Azure/iot-hub-device-update"
-SRC_URI ?= "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
+ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
+SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 ADU_GIT_COMMIT ?= "350a551dd9d3f5639eddceb75ef5b10e834865fe"
 # CMake build types: "Release" "RelWithDebInfo" "MinSizeRel"
 BUILD_TYPE ?= "Debug"
