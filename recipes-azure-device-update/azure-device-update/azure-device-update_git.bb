@@ -106,7 +106,6 @@ S = "${WORKDIR}/git"
 # curl, DO agent, and DO SDK
 # Gen2 requires mosquitto recipe from openembedded meta-networking layer
 DEPENDS = "deliveryoptimization-agent deliveryoptimization-sdk curl azure-iot-sdk-c"
-DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-iot-sdk-c', '', d)}"
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp', '', d)}"
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '2', 'mosquitto', '', d)}"
 
