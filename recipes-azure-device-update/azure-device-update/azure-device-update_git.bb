@@ -34,6 +34,17 @@ ADU_GIT_COMMIT ?= "350a551dd9d3f5639eddceb75ef5b10e834865fe"
 BUILD_TYPE ?= "Debug"
 WITH_FEATURE_DELTA_UPDATE ?= "0"
 
+# We are going to be adding extra files for both gen1 and gen2
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
+# Setup NTP servers (and fallbacks) to sync the date+time and not fail when
+# verifying the TLS server ca cert due to "notBefore" property.
+SRC_URI += "file://timesyncd.conf"
+do_install_append() {
+    install -d ${D}${sysconfdir}/systemd
+    install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/
+}
+
 # Handle override of default vars with those for Gen2
 python() {
     try:
@@ -67,7 +78,6 @@ python() {
             # work for yocto recipe.
             #
             # Add paths for custom files
-            d.prependVar('FILESEXTRAPATHS', '${THISDIR}/files:')   # FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
             d.appendVar('SRC_URI', ' file://Findmosquitto.cmake')  # SRC_URI += "file://Findmosquitto.cmake"
 
             # Create configure_prepend function. The equivalent of:
