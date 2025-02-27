@@ -34,9 +34,6 @@ ADU_GIT_COMMIT ?= "350a551dd9d3f5639eddceb75ef5b10e834865fe"
 BUILD_TYPE ?= "Debug"
 WITH_FEATURE_DELTA_UPDATE ?= "0"
 
-# We are going to be adding extra files for both gen1 and gen2
-FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
 # verifying the TLS server ca cert due to "notBefore" property.
 # See do_install:append() below for where it installs timesyncd.conf
