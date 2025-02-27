@@ -40,7 +40,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
 # verifying the TLS server ca cert due to "notBefore" property.
 SRC_URI += "file://timesyncd.conf"
-do_install_append() {
+do_install:append() {
     install -d ${D}${sysconfdir}/systemd
     install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/
 }
