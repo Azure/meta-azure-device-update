@@ -39,11 +39,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
 # verifying the TLS server ca cert due to "notBefore" property.
+# See do_install:append() below for where it installs timesyncd.conf
 SRC_URI += "file://timesyncd.conf"
-do_install:append() {
-    install -d ${D}${sysconfdir}/systemd
-    install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/
-}
 
 # Handle override of default vars with those for Gen2
 python() {
@@ -224,6 +221,10 @@ do_compile[depends] += "azure-iot-sdk-c:do_prepare_recipe_sysroot"
 do_compile[depends] += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp:do_prepare_recipe_sysroot', '', d)}"
 
 do_install:append() {
+    # Install timesyncd.conf to setup NTP to sync the time correctly.
+    install -d ${D}${sysconfdir}/systemd
+    install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/
+
     #create ADUC_DATA_DIR
     install -d ${D}${ADUC_DATA_DIR}
     chgrp ${ADUGROUP} ${D}${ADUC_DATA_DIR}
