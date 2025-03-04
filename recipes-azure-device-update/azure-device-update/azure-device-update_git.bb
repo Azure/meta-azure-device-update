@@ -157,6 +157,8 @@ EXTRA_OECMAKE += "-DADUC_LOG_FOLDER=/adu/logs"
 EXTRA_OECMAKE += "-DADUC_CONF_FOLDER=/adu"
 # Don't install/configure the daemon, another bitbake recipe will do that.
 EXTRA_OECMAKE += "-DADUC_INSTALL_DAEMON=OFF"
+# Enable Test Root Keys
+EXTRA_OECMAKE += "-DADUC_USE_TEST_ROOT_KEYS=true"
 #
 # Using the installed DO SDK include files.
 EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
