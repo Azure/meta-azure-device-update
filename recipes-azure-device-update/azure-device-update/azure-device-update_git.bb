@@ -22,8 +22,11 @@ MAINTAINER = "Microsoft Azure Device Update"
 # in the environment's variables.
 #
 
-# # The agent generation. Can be "1" or "2"
+# The agent generation. Can be "1" or "2"
 ADU_GENERATION ?= "1"
+
+# Bake TEST Root Keys into the agent binary in lieu of the default PROD Root Keys.
+ADU_EMBED_TEST_ROOT_KEYS ?= "0"
 
 # For gen1, the release come out of develop branch, not main.
 ADU_GIT_BRANCH ?= "develop"
@@ -32,6 +35,11 @@ SRC_URI = "${ADU_SRC_URI};protocol=https;branch=${ADU_GIT_BRANCH}"
 ADU_GIT_COMMIT ?= "350a551dd9d3f5639eddceb75ef5b10e834865fe"
 # CMake build types: "Release" "RelWithDebInfo" "MinSizeRel"
 BUILD_TYPE ?= "Debug"
+
+#
+# Feature flags
+#
+# Include DeltaUpdate Processor libary
 WITH_FEATURE_DELTA_UPDATE ?= "0"
 
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
@@ -157,12 +165,13 @@ EXTRA_OECMAKE += "-DADUC_LOG_FOLDER=/adu/logs"
 EXTRA_OECMAKE += "-DADUC_CONF_FOLDER=/adu"
 # Don't install/configure the daemon, another bitbake recipe will do that.
 EXTRA_OECMAKE += "-DADUC_INSTALL_DAEMON=OFF"
-#
 # Using the installed DO SDK include files.
 EXTRA_OECMAKE += "-DDOSDK_INCLUDE_DIR=${WORKDIR}/recipe-sysroot/usr/include"
 EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 # cpprest installs its config.cmake file in a non-standard location.
 EXTRA_OECMAKE += "${@bb.utils.contains('ADU_GENERATION', '1', '-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake', '', d)}"
+# Enable Test Root Keys
+EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_USE_TEST_ROOT_KEYS=true', '', d)}"
 
 # RDEPENDS are the RUNTIME dependencies that must be installed on the target
 # system for the cuurent package to function correctly.
