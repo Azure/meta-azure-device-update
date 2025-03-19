@@ -173,7 +173,7 @@ EXTRA_OECMAKE += "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 EXTRA_OECMAKE += "${@bb.utils.contains('ADU_GENERATION', '1', '-Dcpprestsdk_DIR=${WORKDIR}/recipe-sysroot/usr/lib/cmake', '', d)}"
 # Enable Test Root Keys
 EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_USE_TEST_ROOT_KEYS=true', '', d)}"
-EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_E2E_TESTING_ENABLED=true', '', d)}"
+EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_ENABLE_E2E_TESTING=true', '', d)}"
 
 # RDEPENDS are the RUNTIME dependencies that must be installed on the target
 # system for the cuurent package to function correctly.
