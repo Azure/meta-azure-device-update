@@ -43,6 +43,12 @@ BUILD_TYPE ?= "Debug"
 # Include DeltaUpdate Processor libary
 WITH_FEATURE_DELTA_UPDATE ?= "0"
 
+# Enable building unit tests (requires Catch2)
+WITH_ADUC_TESTS ?= "0"
+
+# Always include Catch2 as build dependency (some CMake may require it)
+WITH_ADUC_CATCH2_DEP ?= "1"
+
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
 # verifying the TLS server ca cert due to "notBefore" property.
 # See do_install:append() below for where it installs timesyncd.conf
@@ -121,6 +127,7 @@ S = "${WORKDIR}/git"
 DEPENDS = "deliveryoptimization-agent deliveryoptimization-sdk curl azure-iot-sdk-c"
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp', '', d)}"
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '2', 'mosquitto', '', d)}"
+DEPENDS += "${@bb.utils.contains('WITH_ADUC_CATCH2_DEP', '1', 'catch2', '', d)}"
 
 # Append to the build-time dependencies as per differences between Gen1 and Gen2
 #
@@ -174,6 +181,14 @@ EXTRA_OECMAKE += "${@bb.utils.contains('ADU_GENERATION', '1', '-Dcpprestsdk_DIR=
 # Enable Test Root Keys
 EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_USE_TEST_ROOT_KEYS=true', '', d)}"
 EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_ENABLE_E2E_TESTING=true', '', d)}"
+# Enable building unit tests with Catch2
+EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '1', '-DADUC_BUILD_UNIT_TESTS=ON', '-DADUC_BUILD_UNIT_TESTS=OFF', d)}"
+
+# Additional flags to completely disable all testing and test discovery  
+EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DBUILD_TESTING=OFF', '', d)}"
+EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DCATCH_BUILD_TESTING=OFF', '', d)}"
+EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DENABLE_TESTING=OFF', '', d)}"
+EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DCMAKE_DISABLE_TESTING=ON', '', d)}"
 
 # RDEPENDS are the RUNTIME dependencies that must be installed on the target
 # system for the cuurent package to function correctly.
