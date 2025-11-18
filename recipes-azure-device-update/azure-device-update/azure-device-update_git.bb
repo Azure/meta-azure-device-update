@@ -46,8 +46,9 @@ WITH_FEATURE_DELTA_UPDATE ?= "0"
 # Enable building unit tests (requires Catch2)
 WITH_ADUC_TESTS ?= "0"
 
-# Always include Catch2 as build dependency (some CMake may require it)
-WITH_ADUC_CATCH2_DEP ?= "1"
+# Include Catch2 as build dependency when tests are enabled
+# Set to "1" to always include Catch2, "0" to never include it, or leave unset to inherit from WITH_ADUC_TESTS
+WITH_ADUC_CATCH2_DEP ?= "${WITH_ADUC_TESTS}"
 
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
 # verifying the TLS server ca cert due to "notBefore" property.
