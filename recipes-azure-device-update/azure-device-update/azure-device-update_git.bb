@@ -47,7 +47,7 @@ WITH_FEATURE_DELTA_UPDATE ?= "0"
 WITH_ADUC_TESTS ?= "0"
 
 # Include Catch2 as build dependency when tests are enabled
-# Set to "1" to always include Catch2 (safer), "0" to only include when tests enabled
+# Set to "1" to always include Catch2, "0" to never include it, or leave unset to inherit from WITH_ADUC_TESTS
 WITH_ADUC_CATCH2_DEP ?= "${WITH_ADUC_TESTS}"
 
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
