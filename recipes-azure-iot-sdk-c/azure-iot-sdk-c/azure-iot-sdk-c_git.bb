@@ -33,6 +33,16 @@ do_install:append(){
 	install -d ${D}
 	echo "This package is linked against during compilation" > ${D}/azure-iot-sdk-c-placeholder-file
 	echo "Therefore, there is nothing to install on the target" >> ${D}/azure-iot-sdk-c-placeholder-file
+	
+	# Fix hardcoded TMPDIR paths in CMake target files
+	# Replace absolute paths to libraries with just the library names
+	# This prevents buildpaths QA warnings and makes the package relocatable
+	for cmakefile in $(find ${D} -name "*Targets*.cmake" -o -name "*Config.cmake"); do
+		sed -i \
+			-e 's#${TMPDIR}[^;)]*recipe-sysroot/usr/lib/\([^.]*\.so[^;)]*\)#\1#g' \
+			-e 's#${STAGING_DIR_TARGET}/usr/lib/\([^.]*\.so[^;)]*\)#\1#g' \
+			"$cmakefile"
+	done
 }
 
 FILES:${PN} += " \
