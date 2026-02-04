@@ -12,7 +12,7 @@
       "runas": "adu",
       "connectionSource": {
         "connectionType": "string",
-        "connectionData": "HostName=placeholder.azure-devices.net;DeviceId=placeholder-device;SharedAccessKey=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        "connectionData": "HostName=placeholder.azure-devices.net;DeviceId=placeholder-device;SharedAccessKey="
       },
       "manufacturer": "contoso",
       "model": "raspberrypi-yocto-adu-poc-1"
