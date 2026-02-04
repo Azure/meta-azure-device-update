@@ -1,0 +1,15 @@
+[Unit]
+Description=ADU Out-of-Box Experience - Bootstrap, verify, and maintain ADU partition structure
+Documentation=https://github.com/Azure/iot-hub-device-update
+Documentation=file:///usr/share/doc/adu-config-setup/README-ADU-OOBE-SERVICE.md
+After=adu.mount
+Requires=adu.mount
+Before=deviceupdate-agent.service adu-swap.service adu-boot-health.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/setup-adu-dirs.sh
+
+[Install]
+WantedBy=multi-user.target
