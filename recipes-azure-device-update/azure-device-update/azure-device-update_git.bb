@@ -29,11 +29,11 @@ ADU_GENERATION ?= "1"
 ADU_EMBED_TEST_ROOT_KEYS ?= "0"
 
 # For gen1, the release come out of develop branch, not main.
-ADU_GIT_BRANCH ?= "develop"
+ADU_GIT_BRANCH ?= "feature/vnext-delta"
 ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
 ADU_GIT_PROTOCOL ?= "https"
 SRC_URI = "${ADU_SRC_URI};protocol=${ADU_GIT_PROTOCOL};branch=${ADU_GIT_BRANCH}"
-ADU_GIT_COMMIT ?= "350a551dd9d3f5639eddceb75ef5b10e834865fe"
+ADU_GIT_COMMIT ?= "5b169864a9f6789368f0b701afb4df02018be677"
 # CMake build types: "Release" "RelWithDebInfo" "MinSizeRel"
 BUILD_TYPE ?= "Debug"
 
