@@ -17,4 +17,4 @@ FILES:${PN} += "${systemd_system_unitdir}/deliveryoptimization-agent.service"
 REQUIRED_DISTRO_FEATURES = "systemd"
 RDEPENDS:${PN} += "deliveryoptimization-agent"
 
-inherit allarch systemd
+inherit allarch systemd features_check
