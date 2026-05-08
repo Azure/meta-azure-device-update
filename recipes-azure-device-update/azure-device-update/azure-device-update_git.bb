@@ -426,7 +426,7 @@ FILES:${PN} += "${bindir}/AducIotAgent"
 FILES:${PN} += "${bindir}/adu-shell"
 # FILES:${PN} += "${bindir}/adu-delta-test"  # Tool disabled for now
 FILES:${PN} += "/usr/lib/adu/adu-reboot-wrapper.sh"
-# yocto-a-b-update.sh is now deployed by meta-raspberrypi-adu layer (Raspberry Pi specific)
+# yocto-a-b-update.sh is now deployed by meta-azure-device-update-bsp layer (board-specific)
 FILES:${PN} += "${ADUC_DATA_DIR}/* ${ADUC_LOG_DIR}/* ${ADUC_CONF_DIR}/*"
 FILES:${PN} += "${ADUC_EXTENSIONS_DIR}/* ${ADUC_EXTENSIONS_INSTALL_DIR}/* ${ADUC_DOWNLOADS_DIR}/*"
 FILES:${PN} += "${ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR}/* ${ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR}/* ${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}/* ${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR}/*"
