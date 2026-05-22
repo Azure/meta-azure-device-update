@@ -1,0 +1,25 @@
+From 61b1eb203e3235f6c066a2be511afc9ddc99af87 Mon Sep 17 00:00:00 2001
+From: jw-msft <84477130+jw-msft@users.noreply.github.com>
+Date: Wed, 5 Feb 2025 21:01:06 +0000
+Subject: [PATCH] add std array include in download cpp
+
+---
+ client-lite/src/download/download.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/client-lite/src/download/download.cpp b/client-lite/src/download/download.cpp
+index a11926e..d5a3518 100644
+--- a/client-lite/src/download/download.cpp
++++ b/client-lite/src/download/download.cpp
+@@ -15,6 +15,8 @@
+ #include "task_thread.h"
+ #include "telemetry_logger.h"
+ 
++#include <array>
++
+ namespace msdod = microsoft::deliveryoptimization::details;
+ 
+ const std::chrono::seconds Download::_unsetTimeout = std::chrono::seconds(0);
+-- 
+2.25.1
+

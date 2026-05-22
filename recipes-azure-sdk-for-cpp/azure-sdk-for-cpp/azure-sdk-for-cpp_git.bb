@@ -11,7 +11,10 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 SRC_URI = "git://github.com/Azure/azure-sdk-for-cpp.git;protocol=https;branch=main"
 
 SRCREV = "f757bb06e71adb829edcaf2867abc4e87c5aa23f"
-SRC_URI += "file://0001-Fixup-compiler-warning.patch"
+
+SRC_URI += "file://0001-Fixup-compiler-warning.patch \
+            file://0002-fix-gcc13-base64-compile-error.patch \
+            "
 PV = "1.0+git${SRCPV}"
 
 S = "${WORKDIR}/git"
@@ -21,6 +24,19 @@ S = "${WORKDIR}/git"
 DEPENDS = "util-linux curl openssl libxml2 opentelemetry-cpp"
 
 inherit cmake
+
+do_install:append() {
+    # Fix hardcoded TMPDIR paths in CMake target files
+    # Replace absolute paths to libraries with just the library names
+    # This prevents buildpaths QA warnings and makes the package relocatable
+    
+    for cmakefile in $(find ${D}${datadir} -name "*Targets*.cmake"); do
+        sed -i \
+            -e 's#${TMPDIR}[^;)]*recipe-sysroot/usr/lib/\([^.]*\.so\)[^;)]*#\1#g' \
+            -e 's#${STAGING_DIR_TARGET}/usr/lib/\([^.]*\.so\)[^;)]*#\1#g' \
+            "$cmakefile"
+    done
+}
 
 sysroot_stage_all:append () {
     sysroot_stage_dir ${D}${exec_prefix}/cmake ${SYSROOT_DESTDIR}${exec_prefix}/cmake

@@ -1,0 +1,25 @@
+From 87e40476c6d540e2a9ef43e862cbbfd9a226622a Mon Sep 17 00:00:00 2001
+From: nihemstr <nihemstr@microsoft.com>
+Date: Tue, 6 Aug 2024 14:53:19 +0000
+Subject: [PATCH] Migrated device update meta layer to scarthgap
+
+---
+
+Upstream-Status: Pending
+
+ common/cmake/Findlibproxy.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/cmake/Findlibproxy.cmake b/common/cmake/Findlibproxy.cmake
+index c6c8f84..bd24879 100644
+--- a/common/cmake/Findlibproxy.cmake
++++ b/common/cmake/Findlibproxy.cmake
+@@ -10,7 +10,7 @@ include(FindPackageHandleStandardArgs)
+ find_path(
+     libproxy_INCLUDE_DIR
+     NAMES proxy.h
+-    PATH_SUFFIXES include
++    PATH_SUFFIXES libproxy
+ )
+ 
+ find_library(libproxy_LIBRARY proxy)

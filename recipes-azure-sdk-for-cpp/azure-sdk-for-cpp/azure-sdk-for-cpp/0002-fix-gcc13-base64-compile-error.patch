@@ -1,0 +1,55 @@
+commit 2f6088025328e631713e23fba26db2c2cf2c9586
+Author: adamdebreceni <64783590+adamdebreceni@users.noreply.github.com>
+Date:   Tue Aug 22 20:49:35 2023 +0000
+
+    Address gcc13 compilation  issue
+
+diff --git a/sdk/core/azure-core/inc/azure/core/base64.hpp b/sdk/core/azure-core/inc/azure/core/base64.hpp
+index 6f65a0b7..cc2a7054 100644
+--- a/sdk/core/azure-core/inc/azure/core/base64.hpp
++++ b/sdk/core/azure-core/inc/azure/core/base64.hpp
+@@ -10,6 +10,7 @@
+ #pragma once
+ 
+ #include <algorithm>
++#include <cstdint>
+ #include <stdexcept>
+ #include <string>
+ #include <vector>
+diff --git a/sdk/core/azure-core/inc/azure/core/uuid.hpp b/sdk/core/azure-core/inc/azure/core/uuid.hpp
+index fbf73004..1f660224 100644
+--- a/sdk/core/azure-core/inc/azure/core/uuid.hpp
++++ b/sdk/core/azure-core/inc/azure/core/uuid.hpp
+@@ -10,6 +10,8 @@
+ 
+ #include "azure/core/platform.hpp"
+ 
++#include <array>
++#include <cstdint>
+ #include <cstring>
+ #include <string>
+ 
+diff --git a/sdk/keyvault/azure-security-keyvault-keys/src/private/key_sign_parameters.hpp b/sdk/keyvault/azure-security-keyvault-keys/src/private/key_sign_parameters.hpp
+index de432c68..1d8c9944 100644
+--- a/sdk/keyvault/azure-security-keyvault-keys/src/private/key_sign_parameters.hpp
++++ b/sdk/keyvault/azure-security-keyvault-keys/src/private/key_sign_parameters.hpp
+@@ -9,6 +9,7 @@
+ 
+ #pragma once
+ 
++#include <cstdint>
+ #include <string>
+ #include <vector>
+ 
+diff --git a/sdk/keyvault/azure-security-keyvault-keys/src/private/key_verify_parameters.hpp b/sdk/keyvault/azure-security-keyvault-keys/src/private/key_verify_parameters.hpp
+index 9dc335f4..71839caf 100644
+--- a/sdk/keyvault/azure-security-keyvault-keys/src/private/key_verify_parameters.hpp
++++ b/sdk/keyvault/azure-security-keyvault-keys/src/private/key_verify_parameters.hpp
+@@ -9,6 +9,7 @@
+ 
+ #pragma once
+ 
++#include <cstdint>
+ #include <string>
+ #include <vector>
+ 

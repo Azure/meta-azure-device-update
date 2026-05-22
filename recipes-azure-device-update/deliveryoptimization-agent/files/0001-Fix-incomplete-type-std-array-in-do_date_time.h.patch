@@ -1,0 +1,37 @@
+From a36711b9b6dead0f9de0daf9732fbac75efe1a73 Mon Sep 17 00:00:00 2001
+From: jw-msft <84477130+jw-msft@users.noreply.github.com>
+Date: Wed, 5 Feb 2025 20:54:59 +0000
+Subject: [PATCH] Fix incomplete type std::array in do_date_time.h
+
+---
+ client-lite/src/util/do_date_time.h | 1 +
+ sdk-cpp/src/do_download.cpp         | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/client-lite/src/util/do_date_time.h b/client-lite/src/util/do_date_time.h
+index 9339a5b..1edc706 100644
+--- a/client-lite/src/util/do_date_time.h
++++ b/client-lite/src/util/do_date_time.h
+@@ -3,6 +3,7 @@
+ 
+ #include "do_common.h"
+ #include <chrono>
++#include <array>
+ 
+ using filetime_duration_t = std::chrono::duration<INT64, std::ratio<1,10000000>>;
+ using wall_clock_t = std::chrono::system_clock;
+diff --git a/sdk-cpp/src/do_download.cpp b/sdk-cpp/src/do_download.cpp
+index 966d9eb..de9cda9 100644
+--- a/sdk-cpp/src/do_download.cpp
++++ b/sdk-cpp/src/do_download.cpp
+@@ -6,6 +6,7 @@
+ #include <system_error>
+ #include <cassert>
+ #include <thread>
++#include <array>
+ 
+ #include "do_errors.h"
+ #include "do_error_helpers.h"
+-- 
+2.25.1
+

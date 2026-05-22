@@ -6,7 +6,7 @@ Wants=network-online.target deliveryoptimization-agent.service
 [Service]
 Type=simple
 Restart=always
-RestartSec=5
+RestartSec=30
 User=adu
 Group=adu
 # We can check logs with journalctl -f -u deviceupdate-agent.service --no-tail

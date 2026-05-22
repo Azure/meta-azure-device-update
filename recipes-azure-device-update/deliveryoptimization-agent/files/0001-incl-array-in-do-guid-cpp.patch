@@ -1,0 +1,25 @@
+From 574dd6795c6f9c2d31bbf223ccbd79b033531772 Mon Sep 17 00:00:00 2001
+From: jw-msft <84477130+jw-msft@users.noreply.github.com>
+Date: Wed, 5 Feb 2025 21:21:52 +0000
+Subject: [PATCH] incl array in do guid cpp
+
+---
+ client-lite/src/util/do_guid.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/client-lite/src/util/do_guid.cpp b/client-lite/src/util/do_guid.cpp
+index f0ebc0b..d5c6287 100644
+--- a/client-lite/src/util/do_guid.cpp
++++ b/client-lite/src/util/do_guid.cpp
+@@ -9,6 +9,8 @@
+ #include <boost/uuid/uuid_generators.hpp>
+ #include "string_ops.h"
+ 
++#include <array>
++
+ GUID CreateNewGuid()
+ {
+     static_assert(sizeof(GUID) == boost::uuids::uuid::static_size());
+-- 
+2.25.1
+

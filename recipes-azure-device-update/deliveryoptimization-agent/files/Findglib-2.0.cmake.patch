@@ -1,0 +1,68 @@
+From 9cd91b89294909939da065a7db24f3bee1e242bf Mon Sep 17 00:00:00 2001
+From: nihemstr <nihemstr@microsoft.com>
+Date: Tue, 6 Aug 2024 14:53:19 +0000
+Subject: [PATCH] Migrated device update meta layer to scarthgap
+
+---
+
+Upstream-Status: Pending
+
+ common/cmake/Findglib-2.0.1.cmake | 49 +++++++++++++++++++++++++++++++
+ 1 file changed, 49 insertions(+)
+ create mode 100644 common/cmake/Findglib-2.0.1.cmake
+
+diff --git a/common/cmake/Findglib-2.0.1.cmake b/common/cmake/Findglib-2.0.1.cmake
+new file mode 100644
+index 0000000..b6a3699
+--- /dev/null
++++ b/common/cmake/Findglib-2.0.1.cmake
+@@ -0,0 +1,49 @@
++# Copyright (c) Microsoft Corporation.
++# Licensed under the MIT License.
++
++cmake_minimum_required (VERSION 3.7)
++
++# cmake find module for the libproxy library and headers
++
++include(FindPackageHandleStandardArgs)
++
++find_path(
++    Glib2.0_INCLUDE_DIR
++    NAMES glib.h
++    PATH_SUFFIXES glib-2.0
++)
++find_path(GlibConfig_INCLUDE_DIR
++  NAMES glibconfig.h
++  PATHS /usr
++  PATH_SUFFIXES lib/glib-2.0/include
++)
++
++set(libglib-2.0_INCLUDE_DIR ${Glib2.0_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR})
++message ( WARNING "${Glib2.0_INCLUDE_DIR}")
++message( WARNING "Found include dirs: ${libglib-2.0_INCLUDE_DIR}" )
++
++find_library(libglib-2.0_LIBRARY glib-2.0)
++
++find_package_handle_standard_args(
++    libglib-2.0
++    DEFAULT_MSG
++    libglib-2.0_INCLUDE_DIR
++    libglib-2.0_LIBRARY
++)
++
++if(libglib-2.0_FOUND)
++
++    message( WARNING "Found include dirs: ${libglib-2.0_INCLUDE_DIR}" )
++    set(libglib-2.0_LIBRARIES ${libglib-2.0_LIBRARY})
++
++    message(STATUS "lib: ${libglib-2.0_LIBRARY}, found: ${libglib-2.0_FOUND}")
++
++    if(NOT TARGET libglib-2.0::glib)
++        add_library (libglib-2.0::glib INTERFACE IMPORTED)
++        set_target_properties(
++          libglib-2.0::glib
++            PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${libglib-2.0_INCLUDE_DIR}"
++                       INTERFACE_LINK_LIBRARIES "${libglib-2.0_LIBRARIES}"
++        )
++    endif()
++endif()
