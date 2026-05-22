@@ -1,0 +1,13 @@
+{
+    "logComponents":[
+        {
+            "componentName":"adu",
+            "logPath":"/var/log/adu/"
+        },
+        {
+            "componentName":"do",
+            "logPath":"/var/log/deliveryoptimization-agent/"
+        }
+    ],
+    "maxKilobytesToUploadPerLogPath":50
+}

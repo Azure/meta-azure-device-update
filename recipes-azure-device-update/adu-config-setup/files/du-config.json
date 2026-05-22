@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.2",
+  "aduShellTrustedUsers": [
+    "adu",
+    "do"
+  ],
+  "manufacturer": "contoso",
+  "model": "raspberrypi-yocto-adu-poc-1",
+  "agents": [
+    {
+      "name": "main",
+      "runas": "adu",
+      "connectionSource": {
+        "connectionType": "string",
+        "connectionData": "HostName=placeholder.azure-devices.net;DeviceId=placeholder-device;SharedAccessKey=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "manufacturer": "contoso",
+      "model": "raspberrypi-yocto-adu-poc-1"
+    }
+  ]
+}

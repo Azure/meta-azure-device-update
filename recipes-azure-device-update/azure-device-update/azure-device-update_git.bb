@@ -29,19 +29,30 @@ ADU_GENERATION ?= "1"
 ADU_EMBED_TEST_ROOT_KEYS ?= "0"
 
 # For gen1, the release come out of develop branch, not main.
-ADU_GIT_BRANCH ?= "develop"
+ADU_GIT_BRANCH ?= "feature/vnext-delta"
 ADU_SRC_URI ?= "git://github.com/Azure/iot-hub-device-update"
 ADU_GIT_PROTOCOL ?= "https"
 SRC_URI = "${ADU_SRC_URI};protocol=${ADU_GIT_PROTOCOL};branch=${ADU_GIT_BRANCH}"
-ADU_GIT_COMMIT ?= "350a551dd9d3f5639eddceb75ef5b10e834865fe"
+ADU_GIT_COMMIT ?= "5b169864a9f6789368f0b701afb4df02018be677"
 # CMake build types: "Release" "RelWithDebInfo" "MinSizeRel"
 BUILD_TYPE ?= "Debug"
+
+# Local source support for development
+# Enable: Set USE_LOCAL_ADU_SOURCE=1 and ensure it's passed through to BitBake:
+#   BB_ENV_PASSTHROUGH_ADDITIONS="USE_LOCAL_ADU_SOURCE ADU_LOCAL_SOURCE_DIR"
+# Override default path: export ADU_LOCAL_SOURCE_DIR=/custom/path
+# See layer README.md for usage examples
+ADU_LOCAL_SOURCE_DIR ?= "${TOPDIR}/../../../sources/iot-hub-device-update"
 
 #
 # Feature flags
 #
 # Include DeltaUpdate Processor libary
-WITH_FEATURE_DELTA_UPDATE ?= "0"
+WITH_FEATURE_DELTA_UPDATE ?= "1"
+
+# Use .NET-based diff generation tool (requires Mono runtime)
+# Set to "0" to use alternative diff tools (e.g., Python bsdiff)
+WITH_DOTNET_DIFFGEN_TOOL ?= "0"
 
 # Enable building unit tests (requires Catch2)
 WITH_ADUC_TESTS ?= "0"
@@ -50,10 +61,38 @@ WITH_ADUC_TESTS ?= "0"
 # Set to "1" to always include Catch2, "0" to never include it, or leave unset to inherit from WITH_ADUC_TESTS
 WITH_ADUC_CATCH2_DEP ?= "${WITH_ADUC_TESTS}"
 
-# Setup NTP servers (and fallbacks) to sync the date+time and not fail when
-# verifying the TLS server ca cert due to "notBefore" property.
-# See do_install:append() below for where it installs timesyncd.conf
-SRC_URI += "file://timesyncd.conf"
+# Local source development mode
+python __anonymous() {
+    import os
+    
+    use_local = d.getVar('USE_LOCAL_ADU_SOURCE')
+    local_src = d.getVar('ADU_LOCAL_SOURCE_DIR')
+    
+    if use_local == "1":
+        if local_src and os.path.exists(local_src):
+            bb.warn("=" * 60)
+            bb.warn("Using LOCAL ADU source from: %s" % local_src)
+            bb.warn("GitHub fetch: DISABLED")
+            bb.warn("Patches: NOT APPLIED (apply manually if needed)")
+            bb.warn("=" * 60)
+            
+            # Set EXTERNALSRC to use local directory
+            d.setVar('EXTERNALSRC', local_src)
+            d.setVar('EXTERNALSRC_BUILD', local_src + '/build-yocto')
+            
+            # Override S to point to EXTERNALSRC instead of ${WORKDIR}/git
+            d.setVar('S', local_src)
+            
+            # Disable fetch and unpack tasks (source already available)
+            d.setVarFlag('do_fetch', 'noexec', '1')
+            d.setVarFlag('do_unpack', 'noexec', '1')
+            d.setVarFlag('do_patch', 'noexec', '1')
+            
+            # Mark as externally provided
+            d.setVar('EXTERNALSRC_SYMLINKS', '')
+        else:
+            bb.fatal("USE_LOCAL_ADU_SOURCE=1 but directory not found: %s" % local_src)
+}
 
 # Handle override of default vars with those for Gen2
 python() {
@@ -129,6 +168,7 @@ DEPENDS = "deliveryoptimization-agent deliveryoptimization-sdk curl azure-iot-sd
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp', '', d)}"
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '2', 'mosquitto', '', d)}"
 DEPENDS += "${@bb.utils.contains('WITH_ADUC_CATCH2_DEP', '1', 'catch2', '', d)}"
+DEPENDS += "${@bb.utils.contains('WITH_FEATURE_DELTA_UPDATE', '1', 'iot-hub-device-update-delta-processor', '', d)}"
 
 # Append to the build-time dependencies as per differences between Gen1 and Gen2
 #
@@ -167,11 +207,8 @@ EXTRA_OECMAKE += "-DADUC_MODEL_FILE=${sysconfdir}/adu-model"
 EXTRA_OECMAKE += "-DADUC_VERSION_FILE=${sysconfdir}/adu-version"
 # Use zlog as the logging library.
 EXTRA_OECMAKE += "-DADUC_LOGGING_LIBRARY=zlog"
-# Change the log directory.
-EXTRA_OECMAKE += "-DADUC_LOG_FOLDER=/adu/logs"
 # Use /adu directory for configuration.
 # The /adu directory is on a seperate partition and is not updated during an OTA update.
-EXTRA_OECMAKE += "-DADUC_CONF_FOLDER=/adu"
 # Don't install/configure the daemon, another bitbake recipe will do that.
 EXTRA_OECMAKE += "-DADUC_INSTALL_DAEMON=OFF"
 # Using the installed DO SDK include files.
@@ -183,13 +220,19 @@ EXTRA_OECMAKE += "${@bb.utils.contains('ADU_GENERATION', '1', '-Dcpprestsdk_DIR=
 EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_USE_TEST_ROOT_KEYS=true', '', d)}"
 EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_ENABLE_E2E_TESTING=true', '', d)}"
 # Enable building unit tests with Catch2
-EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '1', '-DADUC_BUILD_UNIT_TESTS=ON', '-DADUC_BUILD_UNIT_TESTS=OFF', d)}"
+# Force disable unit tests - cross-compilation causes Catch2 test discovery to fail
+EXTRA_OECMAKE += "-DADUC_BUILD_UNIT_TESTS=OFF"
+# Enable delta handler build when delta updates are enabled
+EXTRA_OECMAKE += "${@bb.utils.contains('WITH_FEATURE_DELTA_UPDATE', '1', '-DADUC_BUILD_DELTA_HANDLER=ON', '', d)}"
 
 # Additional flags to completely disable all testing and test discovery  
 EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DBUILD_TESTING=OFF', '', d)}"
 EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DCATCH_BUILD_TESTING=OFF', '', d)}"
 EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DENABLE_TESTING=OFF', '', d)}"
 EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DCMAKE_DISABLE_TESTING=ON', '', d)}"
+EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DADUC_BUILD_UNIT_TESTS=OFF', '', d)}"
+# Disable automatic test discovery for Catch2 during cross-compilation
+EXTRA_OECMAKE += "-DCATCH_DISCOVER_TESTS_ADD_TARGET_IN_TEST_NAME=OFF"
 
 # RDEPENDS are the RUNTIME dependencies that must be installed on the target
 # system for the cuurent package to function correctly.
@@ -200,10 +243,11 @@ EXTRA_OECMAKE += "${@bb.utils.contains('WITH_ADUC_TESTS', '0', '-DCMAKE_DISABLE_
 # adu-log-dir - to create the temporary log directory in the image.
 # deliveryoptimization-agent-service - to install the delivery optimization agent for downloads.
 # curl - for running the diagnostics component, curl content downloader
-# azure-device-update-diffs - to include the recipe for github.com:azure/iot-hub-device-update-delta runtime shared lib for delta updates.
+# iot-hub-device-update-delta-processor - to include the runtime shared lib for delta updates.
 #
 RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
-RDEPENDS:${PN} += "${@bb.utils.contains('WITH_FEATURE_DELTA_UPDATE', '1', 'azure-device-update-diffs', '', d)}"
+RDEPENDS:${PN} += "${@bb.utils.contains('WITH_DOTNET_DIFFGEN_TOOL', '1', 'iot-hub-device-update-delta-diff-generation', '', d)}"
+RDEPENDS:${PN} += "${@bb.utils.contains('WITH_FEATURE_DELTA_UPDATE', '1', 'iot-hub-device-update-delta-processor', '', d)}"
 
 ADUC_DATA_DIR ?= "/var/lib/adu"
 ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
@@ -244,10 +288,24 @@ USERADD_PARAM:${PN} = "\
 do_compile[depends] += "azure-iot-sdk-c:do_prepare_recipe_sysroot"
 do_compile[depends] += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp:do_prepare_recipe_sysroot', '', d)}"
 
+# Run unit tests after compilation if enabled
+do_compile:append() {
+    if [ "${WITH_ADUC_TESTS}" = "1" ]; then
+        bbnote "========================================"
+        bbnote "Unit tests built successfully"
+        bbnote "========================================"
+        bbnote "NOTE: Test binaries compiled but NOT executed during cross-compilation"
+        bbnote "Test binaries will be available on target device in /usr/lib/adu/tests/"
+        bbnote "To run tests on device: /usr/lib/adu/tests/<test_name>"
+        bbnote "========================================"
+    else
+        bbnote "Unit tests disabled (WITH_ADUC_TESTS=${WITH_ADUC_TESTS})"
+    fi
+}
+
 do_install:append() {
     # Install timesyncd.conf to setup NTP to sync the time correctly.
     install -d ${D}${sysconfdir}/systemd
-    install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/
 
     #create ADUC_DATA_DIR
     install -d ${D}${ADUC_DATA_DIR}
@@ -280,6 +338,11 @@ do_install:append() {
     chgrp ${ADUGROUP} ${D}${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}
     chmod 0770 ${D}${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}
 
+    #create ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR
+    install -d ${D}${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR}
+    chgrp ${ADUGROUP} ${D}${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR}
+    chmod 0770 ${D}${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR}
+
     #create ADUC_DOWNLOADS_DIR
     install -d ${D}${ADUC_DOWNLOADS_DIR}
     chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_DOWNLOADS_DIR}
@@ -295,8 +358,13 @@ do_install:append() {
     chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_LOG_DIR}
     chmod 0774 ${D}${ADUC_LOG_DIR}
 
-    install -m 0550 ${S}/src/adu-shell/scripts/adu-swupdate.sh ${D}${bindir}
-    chown ${ADUUSER}:${ADUGROUP} ${D}${bindir}/adu-swupdate.sh
+    # Note: adu-swupdate.sh removed - microsoft/swupdate:1 deprecated
+    # Use microsoft/swupdate:2 with yocto-a-b-update.sh instead
+
+    # Install reboot wrapper script to /usr/lib/adu
+    install -d ${D}/usr/lib/adu
+    install -m 0755 ${S}/src/adu-shell/scripts/adu-reboot-wrapper.sh ${D}/usr/lib/adu/
+    chown root:${ADUGROUP} ${D}/usr/lib/adu/adu-reboot-wrapper.sh
 
     #set owner for adu-shell
     chmod 0550 ${D}${bindir}/adu-shell
@@ -304,6 +372,9 @@ do_install:append() {
 
     #set S UID for adu-shell
     chmod u+s ${D}${bindir}/adu-shell
+
+    # Remove systemd config files that should be owned by systemd package
+    rm -f ${D}/etc/systemd/timesyncd.conf
 }
 
 #We don't want the library file hashes to change between do_image -> do_package,
@@ -332,8 +403,8 @@ fakeroot python do_registerAgentExtensions() {
         # TODO: re-enable DO content downloader once available again upstream
         #register_content_downloader("{}/libdeliveryoptimization_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
         register_content_downloader("{}/libcurl_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
-        # TODO: re-enable delta here once patches for recipe is done
-        #register_download_handler("microsoft/delta:1", "{}/libmicrosoft_delta_download_handler.so".format(extensionInstallDir), downloadHandlerRegistrationDirectory, workDir)
+        # Register delta download handler for differential update support
+        register_download_handler("microsoft/delta:1", "{}/libmicrosoft_delta_download_handler.so".format(extensionInstallDir), downloadHandlerRegistrationDirectory, workDir)
 
     except Exception as ex:
         errorMessage = "Failed to create DU Agent extension registration. An exception of type {0} occurred with message:\n{1} and Arguments:\n{2!r}".format(type(ex).__name__, str(ex), ex.args)
@@ -344,13 +415,17 @@ addtask do_registerAgentExtensions after do_install before do_package
 
 fakeroot do_registerAgentExtensions_permissions(){
     chown -R ${ADUUSER}:${ADUGROUP} ${D}${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}
+    chown -R ${ADUUSER}:${ADUGROUP} ${D}${ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR}
+    chown -R ${ADUUSER}:${ADUGROUP} ${D}${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR}
 }
 do_registerAgentExtensions[depends] += "virtual/fakeroot-native:do_populate_sysroot"
 addtask do_registerAgentExtensions_permissions after do_registerAgentExtensions before do_package
 
 FILES:${PN} += "${bindir}/AducIotAgent"
 FILES:${PN} += "${bindir}/adu-shell"
-FILES:${PN} += "${bindir}/adu-swupdate.sh"
+# FILES:${PN} += "${bindir}/adu-delta-test"  # Tool disabled for now
+FILES:${PN} += "/usr/lib/adu/adu-reboot-wrapper.sh"
+# yocto-a-b-update.sh is now deployed by meta-raspberrypi-adu layer (Raspberry Pi specific)
 FILES:${PN} += "${ADUC_DATA_DIR}/* ${ADUC_LOG_DIR}/* ${ADUC_CONF_DIR}/*"
 FILES:${PN} += "${ADUC_EXTENSIONS_DIR}/* ${ADUC_EXTENSIONS_INSTALL_DIR}/* ${ADUC_DOWNLOADS_DIR}/*"
 FILES:${PN} += "${ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR}/* ${ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR}/* ${ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR}/* ${ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR}/*"

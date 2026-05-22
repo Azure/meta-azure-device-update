@@ -1,0 +1,23 @@
+[Unit]
+Description=ADU Filesystem Layout - /adu partition structure setup
+Documentation=https://github.com/Azure/iot-hub-device-update
+After=adu.mount
+Requires=adu.mount
+Before=adu-persistent-overlay.service adu-persistence-symlinks.service deviceupdate-agent.service
+ConditionPathIsMountPoint=/adu
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/setup-adu-filesystem.sh
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/adu
+
+[Install]
+WantedBy=multi-user.target

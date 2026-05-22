@@ -1,0 +1,23 @@
+[Unit]
+Description=ADU Persistence Strategy - Symlinks
+Documentation=https://github.com/Azure/iot-hub-device-update
+After=adu-filesystem-layout.service
+Requires=adu-filesystem-layout.service
+Before=deviceupdate-agent.service
+ConditionPathIsMountPoint=/adu
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/setup-adu-symlinks.sh
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/adu /var/lib /var/log /etc
+
+[Install]
+WantedBy=multi-user.target

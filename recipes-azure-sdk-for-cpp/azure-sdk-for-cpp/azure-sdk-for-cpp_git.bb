@@ -25,6 +25,19 @@ DEPENDS = "util-linux curl openssl libxml2 opentelemetry-cpp"
 
 inherit cmake
 
+do_install:append() {
+    # Fix hardcoded TMPDIR paths in CMake target files
+    # Replace absolute paths to libraries with just the library names
+    # This prevents buildpaths QA warnings and makes the package relocatable
+    
+    for cmakefile in $(find ${D}${datadir} -name "*Targets*.cmake"); do
+        sed -i \
+            -e 's#${TMPDIR}[^;)]*recipe-sysroot/usr/lib/\([^.]*\.so\)[^;)]*#\1#g' \
+            -e 's#${STAGING_DIR_TARGET}/usr/lib/\([^.]*\.so\)[^;)]*#\1#g' \
+            "$cmakefile"
+    done
+}
+
 sysroot_stage_all:append () {
     sysroot_stage_dir ${D}${exec_prefix}/cmake ${SYSROOT_DESTDIR}${exec_prefix}/cmake
 }
