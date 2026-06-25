@@ -479,3 +479,8 @@ def register_download_handler(handlerId, handlerFileInstallPath, handlerExtensio
     typedDirectoryName = handlerId.replace("/", "_").replace(":", "_")
     typedHandlerExtensionDir = os.path.join(handlerExtensionDir, typedDirectoryName)
     create_handlerRegistration(handlerId, handlerFileInstallPath, typedHandlerExtensionDir, "download_handler.json", workDir)
+
+# develop branch flips ADUC_BUILD_WITH_DELIVERY_OPTIMIZATION default to OFF, but this
+# recipe DEPENDS on deliveryoptimization-agent/-sdk and RDEPENDS on the DO service,
+# so force DO support ON (matches feature/vnext-delta default; provides do_download.h include dir).
+EXTRA_OECMAKE += "-DADUC_BUILD_WITH_DELIVERY_OPTIMIZATION=ON"
